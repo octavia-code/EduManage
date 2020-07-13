@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CourseTypeMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseType" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, type_name, created_date, state, state_date
+  </sql>
+  
+  <select id="selectCourseTypeList" resultMap="BaseResultMap">
+    SELECT
+	    id,
+	    type_name
+	FROM
+	    course_type
+	WHERE
+	    state = 'A'
+	ORDER BY
+	    type_name
+  </select>
+  
+  <insert id="insert" parameterType="org.jit.sose.entity.CourseType" >
+  
+  <!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+            SELECT
+			    count(*) AS count
+			FROM
+			    course_type
+			WHERE
+			    state = 'A'
+			AND type_name = #{typeName,jdbcType=VARCHAR}
+        </selectKey>
+        
+	    <!-- 如果等于0即不存在 才插入 -->
+        <if test="count == 0">
+			insert into course_type
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				user_id,
+				type_name,
+				state,
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				1,
+				#{typeName,jdbcType=VARCHAR},
+				'A',
+			</trim>
+		</if>
+		
+		<!-- 若已存在数据，将该数据更新 -->
+		<if test="count > 0">
+			update course_type
+			<set>
+				type_name = type_name,
+			</set>
+			where type_name = #{typeName,jdbcType=VARCHAR}
+		</if>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.CourseType" >
+    update course_type
+    <set >
+		type_name = type_name,
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="listByCourseType" parameterType="org.jit.sose.entity.CourseType"
+		resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"/>
+		FROM
+			course_type
+		WHERE
+			state != 'X'
+		<if test="typeName != null">
+			and LOCATE(#{typeName},type_name)
+		</if>
+		ORDER BY id
+	</select>
+	
+	
+	 <select id="listByCourseTypeDESC" parameterType="org.jit.sose.entity.CourseType"
+		resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"/>
+		FROM
+			course_type
+		WHERE
+			state != 'X'
+        <if test="typeName != null">
+			and LOCATE(#{typeName},type_name)
+        </if>
+		ORDER BY id DESC
+	</select>
+	
+	<update id="delete" parameterType="java.lang.Integer">
+	   UPDATE course_type
+		SET state = 'X'
+		WHERE
+		    id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE course_type
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+	
+	<select id="checkInsert" parameterType="org.jit.sose.entity.CourseType"
+		resultMap="BaseResultMap">
+		SELECT
+			id,type_name
+		FROM
+			course_type
+		WHERE
+			state != 'X'
+			and type_name = #{typeName,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="checkUpdate" parameterType="org.jit.sose.entity.CourseType"
+		resultMap="BaseResultMap">
+		SELECT
+			id,type_name
+		FROM
+			course_type
+		WHERE
+			state != 'X'
+			and type_name = #{typeName,jdbcType=VARCHAR}
+			and id != #{id,jdbcType=INTEGER}
+	</select>
+</mapper>

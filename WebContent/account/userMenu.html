@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户权限</title>
+    <script type="text/javascript" src="../public/common.js"></script>
+</head>
+<body>
+<div class="layout-body" id="userMenu" v-cloak>
+    <layout-header></layout-header>
+    <div id="wrap">
+        <layout-sider></layout-sider>
+        <div class="layout-main">
+            <div class="white">&nbsp;</div>
+            <div>
+                 <!-- 表格 -->
+                <i-table class="table" border height="auto" width="auto" size='small'
+                         :columns="column" :data="nowData" :loading="loading"
+                         @on-selection-change="onSelectionChange">
+                    <template slot-scope="{ row, index }" slot="action" >
+                        <a class="table-a" @click="getSeeDataTree(index)" >查看权限</a>
+                        <a class="table-a" @click="getTree(index);getEditDataTree()" ref="indexData">编辑权限</a>
+                    </template>
+                </i-table>
+
+                <div class="div-inline-left">
+                    <span v-show="selection.length >0">已勾选 {{selection.length}} 条</span>
+                </div>
+
+                <div class="div-inline-right">
+                    <!-- current:当前页码  total:数据总数  page-size:每页条数-->
+                    <Page :current="pageNum" :total="totalNum" :page-size="pageSize"
+                          @on-change="onPageChange" @on-page-size-change="onPageSizeChange"
+                          show-total show-elevator show-sizer></Page>
+                </div>
+            </div>
+            <!-- 编辑模态框 -->
+            <!--<Modal v-model="editSupportCoefficientModal" :mask-closable="false" :draggable="true"
+                   @on-cancel="cancelEditSupportCoefficient">
+                <p slot="header">
+                    <span>编辑支撑系数</span>
+                </p>
+                <center>
+                    <table>
+                        <tr>
+                            <td>系数值:</td>
+                            <td>
+                                <el-input-number class="input" v-model="supportCoefficient.value" :precision="1"
+                                                 :max="1" :min="0" :step="0.1" :step-strictly="true"
+                                                 size="medium"></el-input-number>
+                            </td>
+                        </tr>
+                    </table>
+                </center>
+                <div slot="footer">
+                    <i-button type="text" size="large" @click="cancelEditSupportCoefficient">取消</i-button>
+                    <i-button type="primary" size="large" @click="editSupportCoefficient">确定</i-button>
+                </div>
+            </Modal>-->
+
+            <!-- 删除模态框 -->
+            <!--<Modal v-model="removeSupportCoefficientModal" title="删除支撑系数"
+                   @on-ok="removeSupportCoefficient">
+                <p>确定删除该支撑系数？删除后原有内容将不再进行保存</p>
+            </Modal>-->
+        <!--查看权限模态框 -->
+        <modal v-model="seeDataTreeModal" title="查看用户权限">
+            <el-tree :data="seeDataTree"  empty-text="该用户暂无权限" 
+            :mask-closable="false" :draggable="true"
+            default-expand-all></el-tree>
+        </modal>
+        <!-- 编辑权限模态框 -->
+        <modal v-model="editDataTreeModal" title="编辑用户权限" @on-ok="editOk" ref="editModal">
+            <el-tree    :prop="editProp"
+                        :data="editDataTree"
+                        show-checkbox
+                        node-key="id"
+						:default-checked-keys="checkedKeys"
+                        default-expand-all
+                        :expand-on-click-node="false"
+                        ref="editTree">
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        </span>
+                </el-tree>
+        </modal>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <layout-footer></layout-footer>
+</div>
+<script type="text/javascript" src="./js/userMenu.js"></script>
+</body>
+</html>

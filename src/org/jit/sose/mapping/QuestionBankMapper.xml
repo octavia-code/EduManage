@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.QuestionBankMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.QuestionBank">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="subject" property="subject" jdbcType="VARCHAR" />
+		<result column="chapter" property="chapter" jdbcType="VARCHAR" />
+		<result column="stem" property="stem" jdbcType="VARCHAR" />
+		<result column="answer" property="answer" jdbcType="CHAR" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, subject, chapter, stem, answer, state
+	</sql>
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from question_bank
+		where id = #{id,jdbcType=INTEGER}
+		and state="A"
+	</select>
+	
+	<insert id="insert" parameterType="org.jit.sose.entity.QuestionBank">
+		insert into question_bank (subject, chapter,stem, answer
+		)
+		values (#{subject,jdbcType=VARCHAR},
+		#{chapter,jdbcType=VARCHAR},
+		#{stem,jdbcType=VARCHAR}, #{answer,jdbcType=CHAR}
+		)
+	</insert>
+	
+	 <update id="update" parameterType="org.jit.sose.entity.QuestionBank">
+		update question_bank
+		<set>
+			<if test="subject != null">
+				subject = #{subject,jdbcType=VARCHAR},
+			</if>
+			<if test="chapter != null">
+				chapter = #{chapter,jdbcType=VARCHAR},
+			</if>
+			<if test="stem != null">
+				stem = #{stem,jdbcType=VARCHAR},
+			</if>
+			<if test="answer != null">
+				answer = #{answer,jdbcType=CHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+    <update id="delete" parameterType="java.lang.Integer">
+	    update question_bank
+			SET state ='X'
+			where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <update id="deleteSelection" parameterType="java.util.List">
+	    UPDATE question_bank
+			SET state = 'X'
+			WHERE
+			id IN
+<!-- 			每次从list集合中取出数据放入id中 -->
+			<foreach collection="list" item="id" index="index" separator=","
+				open="(" close=")">
+				#{id,jdbcType=INTEGER}
+			</foreach>
+    </update>
+    
+    <select id="countByQuestionBank" resultType="java.lang.Integer" parameterType="org.jit.sose.entity.QuestionBank">
+	    SELECT
+		    	COUNT(*)
+		    FROM
+		    	question_bank
+		    WHERE
+		    	state = 'A'
+		    <if test="stem!= null">
+		    AND stem = #{stem,jdbcType=VARCHAR}
+		    </if>
+    </select>
+    
+    <select id="listByQuestionBank" parameterType="org.jit.sose.entity.QuestionBank"
+    resultMap="BaseResultMap">
+	    SELECT
+			<include refid="Base_Column_List" />
+			FROM
+			question_bank
+			WHERE
+			state = 'A'
+			<if test="subject!= null">
+			and LOCATE(#{subject},subject)
+			</if>
+			ORDER BY id
+    </select>
+
+    <select id="selectQuestionBankList" resultMap="BaseResultMap" >
+        SELECT
+		    id,
+		    stem
+		FROM
+		    question_bank
+		WHERE
+		    state = 'A'
+		ORDER BY
+		    created_date
+    </select> 
+    
+    <select id="selectFiveQuestion" resultMap="BaseResultMap">
+       select * from question_bank ORDER by RAND() LIMIT 5
+    </select>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ExcelStructureMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ExcelStructure" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="excel_id" property="excelId" jdbcType="INTEGER" />
+    <result column="row_id" property="rowId" jdbcType="INTEGER" />
+    <result column="col_id" property="colId" jdbcType="INTEGER" />
+    <result column="rowspan" property="rowspan" jdbcType="INTEGER" />
+    <result column="colspan" property="colspan" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, excel_id, row_id, col_id, rowspan, colspan, created_date, state_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from excel_structure
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from excel_structure
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.jit.sose.entity.ExcelStructure" >
+    insert into excel_structure (id, excel_id, row_id, 
+      col_id, rowspan, colspan, 
+      created_date, state_date)
+    values (#{id,jdbcType=INTEGER}, #{excelId,jdbcType=INTEGER}, #{rowId,jdbcType=INTEGER}, 
+      #{colId,jdbcType=INTEGER}, #{rowspan,jdbcType=INTEGER}, #{colspan,jdbcType=INTEGER}, 
+      #{createdDate,jdbcType=TIMESTAMP}, #{stateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="org.jit.sose.entity.ExcelStructure" >
+    insert into excel_structure
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="excelId != null" >
+        excel_id,
+      </if>
+      <if test="rowId != null" >
+        row_id,
+      </if>
+      <if test="colId != null" >
+        col_id,
+      </if>
+      <if test="rowspan != null" >
+        rowspan,
+      </if>
+      <if test="colspan != null" >
+        colspan,
+      </if>
+      <if test="createdDate != null" >
+        created_date,
+      </if>
+      <if test="stateDate != null" >
+        state_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="excelId != null" >
+        #{excelId,jdbcType=INTEGER},
+      </if>
+      <if test="rowId != null" >
+        #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null" >
+        #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="rowspan != null" >
+        #{rowspan,jdbcType=INTEGER},
+      </if>
+      <if test="colspan != null" >
+        #{colspan,jdbcType=INTEGER},
+      </if>
+      <if test="createdDate != null" >
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.ExcelStructure" >
+    update excel_structure
+    <set >
+      <if test="excelId != null" >
+        excel_id = #{excelId,jdbcType=INTEGER},
+      </if>
+      <if test="rowId != null" >
+        row_id = #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null" >
+        col_id = #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="rowspan != null" >
+        rowspan = #{rowspan,jdbcType=INTEGER},
+      </if>
+      <if test="colspan != null" >
+        colspan = #{colspan,jdbcType=INTEGER},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.jit.sose.entity.ExcelStructure" >
+    update excel_structure
+    set excel_id = #{excelId,jdbcType=INTEGER},
+      row_id = #{rowId,jdbcType=INTEGER},
+      col_id = #{colId,jdbcType=INTEGER},
+      rowspan = #{rowspan,jdbcType=INTEGER},
+      colspan = #{colspan,jdbcType=INTEGER},
+      created_date = #{createdDate,jdbcType=TIMESTAMP},
+      state_date = #{stateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

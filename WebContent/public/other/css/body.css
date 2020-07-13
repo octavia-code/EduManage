@@ -1,0 +1,116 @@
+.ivu-table-body {
+	overflow: auto;
+	height: auto;
+}
+
+/* table表格分页 */
+.page {
+	margin: 10px;
+	overflow: hidden;
+}
+
+.table {
+	width: 100%;
+}
+
+/* 输入框长度 */
+.input {
+	width: 200px;
+}
+
+/* 添加按钮  */
+.div-inline-left {
+	float: left;
+	width: 150px;
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+/* 搜索按钮，分页 */
+.div-inline-right {
+	float: right;
+	margin-top: 10px;
+}
+
+/* 提示信息 */
+.red {
+	color: red;
+}
+
+.white {
+	height: 5px;
+	background-color: #FFF5EE;
+}
+
+.ivu-table .myRowClassName td {
+	background-color: #dbebf9;
+	height: 10;
+}
+
+.ivu-table .table td {
+	background-color: red;
+	height: 10;
+}
+
+.bodyColor {
+	width: 100%;
+	background-color: #c4e1ff;
+}
+
+/* 搜索框div */
+.qry {
+	/* height: 100px; */
+	position: relative;
+	background-color: #FFF5EE;
+}
+
+/* 条件查询第一行样式 */
+.first {
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+/* 选择框和输入框总体样式 */
+.juinline {
+	padding-left: 20px;
+	padding-right: 0;
+	padding-bottom: 5px;
+}
+
+/* 选择框样式 */
+.chk {
+	float: left;
+	width: 100px;
+}
+
+/* 输入框总体样式 */
+.select_input {
+	width: 150px;
+}
+
+/* 表格左上方按钮width: 200px;     text-align: right;*/
+.butLeft {
+	float: left;
+	width: 500px;
+	padding-bottom: 10px;
+}
+
+/* 搜索按钮样式 */
+.butRight {
+	text-align: right;
+	padding-bottom: 10px;
+}
+
+.table-a {
+	margin-right: 5px;
+}
+
+/*提示框样式*/
+.ivu-poptip-body-message {
+	display: inline-block;
+}
+
+/*模态框文件上传*/
+.upload-text {
+	width: 200px;
+}

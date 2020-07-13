@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CourseClassInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseClassInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="school_info_id" property="schoolInfoId"
+			jdbcType="INTEGER" />
+		<result column="year_term_id" property="yearTermId" jdbcType="INTEGER" />
+		<result column="course_info_id" property="courseInfoId"
+			jdbcType="INTEGER" />
+		<result column="choice_course_no_id" property="choiceCourseNoId"
+			jdbcType="INTEGER" />
+		<result column="staff_id" property="staffId" jdbcType="INTEGER" />
+		<result column="class_info_id" property="classInfoId" jdbcType="INTEGER" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, school_info_id, year_term_id, course_info_id,
+		choice_course_no_id, staff_id,
+		class_info_id,
+		state_date, created_date,
+		state
+	</sql>
+	<!-- 查询课程班级id和选课课号集合 -->
+	<select id="selectCourseClassInfoList" resultMap="BaseResultMap">
+		SELECT
+		cci.id,
+		cci.choice_course_no_id AS choiceCourseNoId,
+		ci.class_name AS className
+		FROM
+		course_class_info cci
+		LEFT JOIN class_info ci ON ci.id =
+		cci.class_info_id
+		WHERE
+		cci.state = 'A'
+		ORDER BY
+		id DESC
+	</select>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM course_class_info
+		WHERE id = #{id,jdbcType=INTEGER}
+	</select>
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE course_class_info
+		SET
+		state = 'X'
+		WHERE id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE course_class_info
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+
+	<insert id="insert" parameterType="org.jit.sose.entity.CourseClassInfo">
+		INSERT INTO course_class_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			school_info_id,
+			year_term_id,
+			course_info_id,
+			choice_course_no_id,
+			staff_id,
+			class_info_id,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{schoolInfoId,jdbcType=INTEGER},
+			#{yearTermId,jdbcType=INTEGER},
+			#{courseInfoId,jdbcType=INTEGER},
+			#{choiceCourseNoId,jdbcType=INTEGER},
+			#{staffId,jdbcType=INTEGER},
+			#{classInfoId,jdbcType=INTEGER},
+		</trim>
+	</insert>
+
+	<select id="countByCourseClassInfo" resultType="java.lang.Integer"
+		parameterType="org.jit.sose.entity.CourseClassInfo">
+		SELECT
+		COUNT(*)
+		FROM
+		course_class_info
+		WHERE
+		state = 'A'
+		AND
+		school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+		AND
+		year_term_id =
+		#{yearTermId,jdbcType=INTEGER}
+		AND course_info_id =
+		#{courseInfoId,jdbcType=INTEGER}
+		AND choice_course_no_id =
+		#{choiceCourseNoId,jdbcType=INTEGER}
+		AND staff_id =
+		#{staffId,jdbcType=INTEGER}
+		AND class_info_id =
+		#{classInfoId,jdbcType=INTEGER}
+	</select>
+
+
+	<select id="getCourseClassInfoId" resultType="java.lang.Integer"
+		parameterType="org.jit.sose.entity.CourseClassInfo">
+		SELECT
+		id
+		FROM
+		course_class_info
+		WHERE
+		state = 'A'
+		AND
+		school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+		AND
+		year_term_id =
+		#{yearTermId,jdbcType=INTEGER}
+		AND course_info_id =
+		#{courseInfoId,jdbcType=INTEGER}
+		AND choice_course_no_id =
+		#{choiceCourseNoId,jdbcType=INTEGER}
+		AND staff_id =
+		#{staffId,jdbcType=INTEGER}
+		AND class_info_id =
+		#{classInfoId,jdbcType=INTEGER}
+	</select>
+
+	<update id="update" parameterType="org.jit.sose.entity.CourseClassInfo">
+		UPDATE course_class_info
+		<set>
+			year_term_id = #{yearTermId,jdbcType=INTEGER},
+			course_info_id =
+			#{courseInfoId,jdbcType=INTEGER},
+			choice_course_no_id =
+			#{choiceCourseNoId,jdbcType=INTEGER},
+			staff_id =
+			#{staffId,jdbcType=INTEGER},
+			class_info_id =
+			#{classInfoId,jdbcType=INTEGER},
+			school_info_id
+			=#{schoolInfoId,jdbcType=INTEGER},
+			year_term_id =
+			#{yearTermId,jdbcType=INTEGER},
+			course_info_id =
+			#{courseInfoId,jdbcType=INTEGER},
+			choice_course_no_id =
+			#{choiceCourseNoId,jdbcType=INTEGER},
+			staff_id =
+			#{staffId,jdbcType=INTEGER},
+			class_info_id =
+			#{classInfoId,jdbcType=INTEGER},
+			school_info_id =
+			#{schoolInfoId,jdbcType=INTEGER},
+			year_term_id =
+			#{yearTermId,jdbcType=INTEGER},
+			course_info_id =
+			#{courseInfoId,jdbcType=INTEGER},
+			choice_course_no_id =
+			#{choiceCourseNoId,jdbcType=INTEGER},
+			staff_id =
+			#{staffId,jdbcType=INTEGER},
+			class_info_id =
+			#{classInfoId,jdbcType=INTEGER},
+		</set>
+		WHERE id = #{id,jdbcType=INTEGER}
+	</update>
+	<select id="listByCourseClassInfo" parameterType="org.jit.sose.entity.CourseClassInfo"
+		resultMap="BaseResultMap">
+		SELECT DISTINCT
+		a.id,
+		a.choice_course_no_id,
+		g.course_no AS courseNo,
+		a.school_info_id,
+		b.school_name AS schoolName,
+		spe.subject_name AS subjectName,
+		f.class_name AS className,
+		c.term_name AS termName,
+		d.course_name AS courseName,
+		co.outline_name AS outlineName,
+		e.staff_code AS staffCode,
+		e.staff_name AS staffName
+		FROM
+		course_class_info a
+		LEFT JOIN choice_course_no g ON a.choice_course_no_id = g.id
+		LEFT JOIN course_outline co ON co.id = g.course_outline_id
+		LEFT JOIN school_info b ON a.school_info_id = b.id
+		LEFT JOIN year_term c ON a.year_term_id = c.id
+		LEFT JOIN course_info d ON a.course_info_id = d.id
+		LEFT JOIN staff_info e ON a.staff_id = e.id
+		LEFT JOIN class_info f ON a.class_info_id = f.id
+		LEFT JOIN specialty spe ON spe.id = f.specialty_id
+		WHERE
+		1 = 1
+		AND a.state = 'A'
+		AND b.state = 'A'
+		AND c.state = 'A'
+		AND d.state = 'A'
+		AND e.state = 'A'
+		AND f.state = 'A'
+		AND spe.state = 'A'
+		<if test="specialtyId != null">
+			AND spe.id=#{specialtyId,jdbcType=INTEGER}
+		</if>
+		<if test="schoolInfoId != null">
+			AND a.school_info_id=#{schoolInfoId,jdbcType=INTEGER}
+		</if>
+		<if test="yearTermId != null">
+			AND a.year_term_id=#{yearTermId,jdbcType=INTEGER}
+		</if>
+		<if test="courseInfoId != null">
+			AND a.course_info_id=#{courseInfoId,jdbcType=INTEGER}
+		</if>
+		<if test="staffId != null">
+			AND a.staff_id=#{staffId,jdbcType=INTEGER}
+		</if>
+		<if test="classInfoId != null">
+			AND a.class_info_id=#{classInfoId,jdbcType=INTEGER}
+		</if>
+		<if test="courseOutlineId != null">
+			AND co.id=#{courseOutlineId,jdbcType=INTEGER}
+		</if>
+		ORDER BY a.id
+	</select>
+
+	<select id="selectByChoiceNoId" parameterType="org.jit.sose.entity.CourseClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		a.id,
+		a.choice_course_no_id,
+		a.class_info_id,
+		b.class_name AS className
+		FROM
+		course_class_info a
+		LEFT JOIN class_info b
+		ON
+		a.class_info_id = b.id
+		WHERE
+		a.state = 'A'
+		AND b.state = 'A'
+		AND
+		choice_course_no_id=#{choiceCourseNoId,jdbcType=INTEGER}
+	</select>
+
+	<select id="selectByClassId" parameterType="org.jit.sose.entity.CourseClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		cci.id,
+		cci.class_info_id,
+		ci.class_name
+		FROM
+		course_class_info cci
+		LEFT JOIN class_info ci ON
+		ci.id=cci.class_info_id
+		WHERE
+		ci.id=#{id}
+	</select>
+
+
+
+</mapper>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>handsontable demo</title>
+    <meta charset="utf-8">
+<script type="text/javascript" src="/public/common.js"></script>
+<script src="test/js/handsontable.full.min.js"></script>
+<script src="test/js/handsontable.full.js"></script>
+<script src="test/js/handsontable.js"></script>
+<script src="test/js/handsontable.min.js"></script>
+<link rel="stylesheet" media="screen" href="test/css/handsontable.css">
+<link rel="stylesheet" media="screen" href="test/css/handsontable.full.css"> 
+<link rel="stylesheet" media="screen" href="test/css/handsontable.full.min.css"> 
+<link rel="stylesheet" media="screen" href="test/css/handsontable.min.css"> 
+</head>
+<body>
+    <div id="example"></div>
+
+    <script>
+            var data = [
+                {riqi:'2017-01',address: '北京', goods:'冰箱',price: '3399',sales: 530,del:''},
+                {riqi:'2017-01', address:'天津',goods: '空调', price:'4299',sales: 522,del:''},
+                {riqi:'2017-01',address: '上海',goods: '洗衣机',price: '1299',sales: 544,del:''},
+                {riqi:'2017-01', address:'广州',goods: '彩电',price: '4599',sales: 562,del:''},
+                {riqi:'2017-01', address:'深圳', goods:'热水器', price:'1099',sales: 430,del:''},
+                {riqi:'2017-02',address: '重庆',goods: '笔记本电脑',price: '4999',sales: 666,del:''},
+                {riqi:'2017-02', address:'厦门',goods: '油烟机',price: '2899',sales: 438,del:''},
+                {riqi:'2017-02',address: '青岛',goods: '饮水机', price:'899',sales: 620,del:''},
+                {riqi:'2017-02', address: '大连', goods: '手机', price: '1999', sales: 500,del:''}
+            ];
+
+            function negativeValueRenderer(instance, td, row, col, prop, value, cellProperties) {
+                Handsontable.renderers.TextRenderer.apply(this, arguments);
+                if (prop == 'address') {//修改字体颜色
+                    td.style.color = '#32CD32';
+                  //右对齐
+                    td.style.textAlign = 'right';
+                  console.log("数据：",td);
+                    //如果要添加其他样式，可以用以下写法
+                    //td.style = 'font-weight: bold;';
+                }
+                else if (prop == 'price') {
+                    //格式化价格数据
+                    td.innerText = value != null ? numbro(value).format('0.00') : "";
+                }
+                else if (prop == 'sales') {
+                    //右对齐
+                    td.style.textAlign = 'right';
+                    td.innerText = value != null ? numbro(value).format('0,0.00') : "";
+                }
+                else if (prop == 'del') {
+                    //添加自定义的图片，并给图片的chick添加事件
+                    var escaped = Handsontable.helper.stringify(value),
+                      imgdel;
+
+                    imgdel = document.createElement('IMG');
+                    imgdel.src = "handsontable/remove.png";
+                    imgdel.width = 20;
+                    imgdel.name = escaped;
+                    imgdel.style = 'cursor:pointer;';//鼠标移上去变手型
+                    Handsontable.dom.addEvent(imgdel, 'click', function (event) {
+                        hot.alter("remove_row", row);//删除当前行
+                    });
+
+                    Handsontable.dom.empty(td);
+                    td.appendChild(imgdel);
+                    td.style.textAlign = 'center';//图片居中对齐
+                    return td;
+                }
+            }
+            Handsontable.renderers.registerRenderer('negativeValueRenderer', negativeValueRenderer);
+
+            var hot = new Handsontable(document.getElementById('example'),{
+                data: data,
+                colHeaders: ['操作', '日期', '地点', '商品', '单价', '销量'], // 使用自定义列头
+                rowHeaders: true,
+                colWidths: 150, // 设置所有列宽为150像素
+                filters: true,
+                columnSorting: true,
+                sortIndicator: true,
+                autoColumnSize: true,
+                manualColumnResize: true,
+                undo: true,
+                redo: true,
+                wordWrap: true,
+                copyable: true,
+                mergeCells: false,
+                manualRowResize: true,
+                manualRowMove: true,
+                manualColumnMove: false,
+                renderAllRows: true,
+                allowInsertRow: true,
+                allowInsertColumn: false,
+                fixedColumnsLeft: 1,
+                columns: [ {
+                    data: 'del',
+                    type: 'text'
+                }, {
+                    data: 'riqi',
+                    type: 'date',
+                    dateFormat: 'YYYY-MM-DD'
+                },{
+                    data: 'address',
+                    type: 'text'
+                },{
+                    data: 'goods',
+                    type: 'text'
+                },{
+                    data: 'price',
+                    type: 'numeric'
+                },{
+                    data: 'sales',
+                    type: 'numeric'
+                }],
+                contextMenu: ['row_above', 'row_below', '---------', 'remove_row','---------','undo','redo','---------','make_read_only','---------','alignment'],
+                dropdownMenu: ['filter_by_condition', 'filter_by_value', 'filter_action_bar'],
+                cells: function (row, col, prop) {
+                    var cellProperties = {};
+                    cellProperties.renderer = "negativeValueRenderer";
+                    return cellProperties;
+                },
+            });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>考核项成绩表</title>
+<script type="text/javascript" src="../public/common.js"></script>
+</head>
+<body>
+<div class="layout-body" id="scoreAssessItem" v-cloak>
+	<layout-header></layout-header>
+	<div id="wrap">
+			<layout-sider></layout-sider>
+			<div class="layout-main">
+				<div class="qry">
+				</div>
+            	<div class="layout-tab">
+                <!-- 表格 -->
+                <i-table id="ItemScoreTable" class="table" border height="auto" size='small'
+                         :columns="column" :data="nowData" :loading="loading"
+                         @on-selection-change="onSelectionChange">
+                </i-table>
+                
+				<div style="margin-top:2%;margin-bottom:2%;text-align:center;">
+				<i-button type="primary" @click="sumbitScore" >提交</i-button>
+				</div>
+            </div>
+			<div style="clear:both"></div>
+		</div>
+</div>
+<layout-footer></layout-footer>
+</div>
+
+<script type="text/javascript" src="./js/scoreAssessItem.js"></script>
+</body>
+</html>

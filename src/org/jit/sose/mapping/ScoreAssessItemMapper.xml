@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ScoreAssessItemMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ScoreAssessItem" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="score_assessment_id" property="scoreAssessmentId" jdbcType="INTEGER" />
+    <result column="assess_item_id" property="assessItemId" jdbcType="INTEGER" />
+    <result column="score" property="score" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="stuId" property="stuId" jdbcType="INTEGER" />
+    <result column="student_number" property="studentNumber" jdbcType="VARCHAR" />
+    <result column="student_name" property="studentName" jdbcType="VARCHAR" />
+    <result column="scoreAssessmentId" property="scoreAssessmentId" jdbcType="INTEGER" />
+    <result column="assessItemId" property="assessItemId" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ItemList" type="org.jit.sose.entity.AssessItem">
+  <id column="indicator_sec_id" property="indicatorSecId" jdbcType="INTEGER" />
+  <result column="content" property="content" jdbcType="VARCHAR" />
+  <result column="max_score" property="maxScore" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <resultMap id="StuWithAssessmentIdList" type="org.jit.sose.entity.ScoreAssessItem" extends="BaseResultMap">
+  <collection column="{scoreAssessmentId=scoreAssessmentId,assessmentId=assessmentId}" property="scoreAssessItemList"  ofType="org.jit.sose.entity.ScoreAssessItem" select="org.jit.sose.mapper.ScoreAssessItemMapper.selectStu_AssId_ScoreByClass_Assess">
+  </collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, score_assessment_id, assess_item_id, score, remark, state, created_date, state_date
+  </sql>
+  <select id="selectItemByAssessmentId" resultMap="ItemList" parameterType="java.lang.Integer">
+		SELECT
+		assess_item.indicator_sec_id,
+		assessment.assess_name,
+		assess_item.content,
+		assess_item.max_score
+		FROM
+		assess_item
+		RIGHT JOIN
+		assessment
+		ON assessment.id=assess_item.assessment_id
+		WHERE
+		assessment.id= #{assessmentId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="listStuAssessmentIdByClassAssessChoiceCourse" resultMap="StuWithAssessmentIdList" parameterType="org.jit.sose.entity.ScoreAssessItem">
+	SELECT
+		s.id AS stuId,
+		s.student_number,
+		s.student_name,
+		sa.id AS scoreAssessmentId,
+		sa.assessment_id AS assessmentId
+	FROM
+		student_info s
+	LEFT JOIN course_class_student_info ccs ON ccs.student_info_id = s.id
+	LEFT JOIN course_class_info cc ON cc.id = ccs.course_class_info_id
+	LEFT JOIN grade_form gf ON (
+		gf.choice_course_no_id = cc.choice_course_no_id
+		AND gf.course_class_info_id = cc.id
+	)
+	LEFT JOIN score_assessment sa ON (
+		sa.grade_form_id = gf.id
+		AND sa.course_class_student_info_id = s.id
+		AND sa.assessment_id = #{assessmentId,jdbcType=INTEGER}
+	)
+	WHERE
+		cc.class_info_id = #{classId,jdbcType=INTEGER}
+	AND cc.choice_course_no_id = #{choiceCourseNoId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectStu_AssId_ScoreByClass_Assess" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	SELECT
+	score_assess_item.score_assessment_id,
+	assess_item.indicator_sec_id AS assessItemId,
+	score_assess_item.score
+	FROM
+	assess_item
+	LEFT JOIN score_assess_item ON score_assess_item.assess_item_id=assess_item.indicator_sec_id
+	WHERE
+	assess_item.assessment_id= #{assessmentId,jdbcType=INTEGER}
+	AND
+	score_assess_item.score_assessment_id= #{scoreAssessmentId,jdbcType=INTEGER}
+  </select>
+  
+  <insert id="insert" parameterType="java.util.List">
+			INSERT INTO score_assess_item (
+				score_assessment_id,
+				assess_item_id,
+				score
+			)
+			VALUES
+			<foreach collection="list" item="item" index="index" separator=",">
+            (#{item.scoreAssessmentId},#{item.assessItemId},#{item.score})
+            </foreach>
+			ON DUPLICATE KEY UPDATE
+			score = VALUES(score)
+  </insert>
+</mapper>

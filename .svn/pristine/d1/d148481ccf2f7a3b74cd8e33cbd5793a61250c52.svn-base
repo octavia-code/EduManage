@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.MenuMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.Menu">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="path" property="path" jdbcType="VARCHAR" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="parent_id" property="parentId" jdbcType="INTEGER" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="is_enable" property="enable" jdbcType="BIT" />
+	</resultMap>
+
+	<resultMap id="MenuListResultMap" type="org.jit.sose.entity.Menu"
+		extends="BaseResultMap">
+		<!-- property:实体类字段 ofType:属性集合中元素的类型 select:转到对应位置的方法 column:传递的参数 -->
+		<collection property="menuList" ofType="org.jit.sose.entity.Menu"
+			select="seleMenuByParentId" column="id"></collection>
+	</resultMap>
+	
+	<resultMap id="MenuListByUserIdResultMap" type="org.jit.sose.entity.Menu"
+        extends="BaseResultMap">
+        <!-- property:实体类字段 ofType:属性集合中元素的类型 select:转到对应位置的方法 column:传递的参数 -->
+        <collection property="menuList" ofType="org.jit.sose.entity.Menu"
+            select="lsitMenuByParentIdAndUserId" column="{parentId=id,userId=userId}"></collection>
+    </resultMap>
+    
+    <resultMap id="MenuListByUserId" type="org.jit.sose.entity.Menu"
+        extends="BaseResultMap">
+        <!-- property:实体类字段 ofType:属性集合中元素的类型 select:转到对应位置的方法 column:传递的参数 -->
+        <collection property="menuList" ofType="org.jit.sose.entity.Menu"
+            select="listByParentId" column="{parentId=id,userId=userId}"></collection>
+    </resultMap>
+        <resultMap id="MenuList" type="org.jit.sose.entity.Menu"
+        extends="BaseResultMap">
+        <!-- property:实体类字段 ofType:属性集合中元素的类型 select:转到对应位置的方法 column:传递的参数 -->
+        <collection property="menuList" ofType="org.jit.sose.entity.Menu"
+            select="selectyParentId" column="{parentId=id}"></collection>
+    </resultMap>
+
+	<sql id="Base_Column_List">
+		id, path, title, name, parent_id, seq, is_enable
+	</sql>
+
+	<sql id="Menu_Column_List">
+		id, title, name, parent_id, seq
+	</sql>
+	
+	<sql id="Select_Column_List">
+        ${tableName}.id, ${tableName}.title, ${tableName}.name, ${tableName}.parent_id
+    </sql>
+	
+	<select id="listMenuByUserId" parameterType="java.lang.Integer" resultMap="MenuListByUserIdResultMap">
+        SELECT
+            <include refid="Select_Column_List">
+              <property name="tableName" value="m"/>
+            </include>, 
+            ur.user_id AS userId
+        FROM
+            `menu` m
+        INNER JOIN menu_role mr ON m.id = mr.menu_id
+        AND mr.state = 'A'
+        INNER JOIN user_role ur ON mr.role_id = ur.role_id
+        AND ur.state = 'A'
+        WHERE
+            m.is_enable = TRUE
+        AND m.parent_id = 0
+        AND ur.user_id = #{userId,jdbcType=INTEGER}
+        ORDER BY
+            m.seq
+    </select>
+    
+    <select id="lsitMenuByParentIdAndUserId" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Select_Column_List">
+              <property name="tableName" value="m"/>
+            </include>
+        FROM
+            `menu` m
+        INNER JOIN menu_role mr ON m.id = mr.menu_id
+        AND mr.state = 'A'
+        INNER JOIN user_role ur ON mr.role_id = ur.role_id
+        AND ur.state = 'A'
+        WHERE
+            m.is_enable = TRUE
+        AND m.parent_id = #{parentId,jdbcType=INTEGER}
+        AND ur.user_id = #{userId,jdbcType=INTEGER}
+        ORDER BY
+            m.seq
+    </select>
+    
+	<select id="selectMenuList" resultMap="MenuListResultMap">
+        SELECT
+        <include refid="Menu_Column_List"></include>
+        FROM
+        `menu`
+        WHERE
+        is_enable = TRUE
+        AND parent_id = 0
+        ORDER BY
+        seq
+    </select>
+
+
+    <select id="seleMenuByParentId" resultMap="MenuListResultMap">
+        SELECT
+        <include refid="Menu_Column_List"></include>
+        FROM
+        `menu`
+        WHERE
+        is_enable = TRUE
+        AND parent_id =
+        #{parentId,jdbcType=INTEGER}
+        ORDER BY
+        seq
+    </select>
+
+	<select id="selectFatherMenuList" resultMap="BaseResultMap">
+		select distinct id ,
+		title from menu where parent_id=0 ORDER BY id ASC
+	</select>
+
+	
+
+	<insert id="insert" parameterType="org.jit.sose.entity.Menu">
+	
+	<!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+            SELECT
+			    count(*) AS count
+			FROM
+			    menu
+			WHERE
+			    name = #{name,jdbcType=VARCHAR}
+        </selectKey>
+        
+	    <!-- 如果等于0即不存在 才插入 -->
+		<if test="count == 0">
+			insert into menu
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			name,
+			title,
+			<if test="path != null">
+				path,
+			</if>
+			parent_id,
+			<if test="seq != null">
+				seq,
+			</if>
+			is_enable,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{name,jdbcType=VARCHAR},
+			#{title,jdbcType=VARCHAR},
+			<if test="path != null">
+				#{path,jdbcType=VARCHAR},
+			</if>
+			#{parentId,jdbcType=INTEGER},
+			<if test="seq != null">
+				#{seq,jdbcType=INTEGER},
+			</if>
+			#{enable,jdbcType=INTEGER},
+		</trim>
+		</if>
+		
+		<!-- 若已存在数据，将该数据更新 -->
+		<if test="count > 0">
+			update menu
+		<set>
+			title = #{title,jdbcType=VARCHAR},
+			<if test="path != null">
+				path = #{path,jdbcType=VARCHAR},
+			</if>
+			parent_id = #{parentId,jdbcType=INTEGER},
+			<if test="seq != null">
+				seq = #{seq,jdbcType=INTEGER},
+			</if>
+			is_enable = #{enable,jdbcType=INTEGER},
+		</set>
+		where name = #{name,jdbcType=VARCHAR}
+		</if>
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.Menu">
+		update menu
+		<set>
+			title = #{title,jdbcType=VARCHAR},
+			parent_id = #{parentId,jdbcType=INTEGER},
+			<if test="seq != null">
+				seq = #{seq,jdbcType=INTEGER},
+			</if>
+			is_enable = #{enable,jdbcType=INTEGER},
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="listMenuByTitle" parameterType="org.jit.sose.entity.Menu"
+		resultMap="BaseResultMap">
+		SELECT
+		m.id,
+		m.`name`,
+		m.title,
+		m.path,
+		m.parent_id,
+		m2.title AS parentTitle,
+		m.seq,
+		m.is_enable
+		FROM
+		menu m
+		LEFT JOIN menu m2 ON m.parent_id = m2.id
+		WHERE
+		1 = 1
+		<if test="title != null">
+			and LOCATE(#{title},m.title)
+		</if>
+		ORDER BY
+		m.parent_id,m.seq
+	</select>
+
+	<select id="listMenuByTitleDesc" parameterType="org.jit.sose.entity.Menu"
+		resultMap="BaseResultMap">
+		SELECT
+		m.id,
+		m.`name`,
+		m.title,
+		m.path,
+		m.parent_id,
+		m2.title AS parentTitle,
+		m.seq,
+		m.is_enable
+		FROM
+		menu m
+		LEFT JOIN menu m2 ON m.parent_id = m2.id
+		WHERE
+		1 = 1
+		<if test="title != null">
+			and LOCATE(#{title},m.title)
+		</if>
+		ORDER BY
+		m.id DESC
+	</select>
+
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE menu
+		SET is_enable = FALSE
+		WHERE
+		title IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="title" index="index"
+			separator="," open="(" close=")">
+			#{title,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE menu
+		SET is_enable =
+		FALSE
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="detail" parameterType="org.jit.sose.entity.Menu"
+		resultMap="BaseResultMap">
+		SELECT
+		m.id,
+		m.`name`,
+		m.title,
+		m.path,
+		m.parent_id,
+		m2.title AS parentTitle,
+		m.seq,
+		m.is_enable
+		FROM
+		menu m
+		LEFT JOIN menu m2 ON m.parent_id = m2.id
+		where 1=1
+		<if test='enableString=="启用"'>
+			and m.is_enable = TRUE
+		</if>
+		<if test='enableString=="禁用"'>
+			and m.is_enable = FALSE
+		</if>
+		<if test='enableString=="皆可"'>
+			and (m.is_enable=TRUE or m.is_enable=FALSE)
+		</if>
+		<if test="title != null">
+			and m.title = #{title,jdbcType=VARCHAR}
+		</if>
+		<if test="parentId != -1">
+			and m.parent_id = #{parentId,jdbcType=INTEGER}
+		</if>
+		ORDER BY m.parent_id,m.seq
+	</select>
+
+	<select id="addCheckSame" parameterType="org.jit.sose.entity.Menu"
+		resultMap="BaseResultMap">
+		SELECT
+		title,path
+		FROM
+		menu
+		where
+		title = #{title,jdbcType=VARCHAR}
+		<if test="path != null">
+			or path = #{path,jdbcType=VARCHAR}
+		</if>
+		ORDER BY id
+	</select>
+	
+	<select id="selectParentByUserId" parameterType="java.lang.Integer" resultMap="MenuListByUserId">
+	SELECT
+		m.*, um.id,um.user_id AS userId
+	FROM
+		menu m
+	INNER JOIN user_menu um ON m.id = um.menu_id AND um.state = 'A'
+	WHERE
+		m.is_enable = TRUE
+	AND m.parent_id = 0
+	AND um.user_id = #{userId,jdbcType=INTEGER}
+	</select>
+	
+	<select id="listByParentId" parameterType="java.util.Map" resultMap="BaseResultMap">
+	SELECT
+		m.*, um.id
+	FROM
+		menu m
+	INNER JOIN user_menu um ON m.id = um.menu_id AND um.state = 'A'
+	WHERE
+		m.is_enable = TRUE
+	AND m.parent_id = #{parentId,jdbcType=INTEGER}
+	AND um.user_id = #{userId,jdbcType=INTEGER}
+	</select>
+	<select id="selectParentMenu" resultMap="MenuList">
+	SELECT
+		id,`name`,title
+	FROM
+		menu m
+	WHERE
+		is_enable = TRUE
+	AND parent_id = 0
+	</select>
+	<select id="selectyParentId" parameterType="java.util.Map" resultMap="BaseResultMap">
+	SELECT
+	*
+	FROM
+	menu
+	WHERE
+	parent_id=#{parentId,jdbcType=INTEGER}
+	AND
+	is_enable = TRUE
+	</select>
+
+</mapper>

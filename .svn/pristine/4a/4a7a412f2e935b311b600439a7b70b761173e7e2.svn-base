@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jit.sose.mapper.ScoreTotalMapper">
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ScoreTotal">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="cou_id" jdbcType="INTEGER" property="couId" />
+    <result column="total_score" jdbcType="DOUBLE" property="totalScore" />
+    <result column="student_state" jdbcType="CHAR" property="studentState" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" />
+    <result column="state_date" jdbcType="TIMESTAMP" property="stateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, cou_id, total_score, student_state, state, created_date, state_date
+  </sql>
+  <!-- 查集合 -->
+   <select id="selectScoreTotalList" resultMap="BaseResultMap">
+    SELECT
+	    id,
+	    total_score
+	FROM
+	    score_total
+	WHERE
+		student_state = 'A'
+		AND
+	    state = 'A'
+	ORDER BY
+	    id
+  </select>
+  <!-- 根据学期信息标识id查询学期信息 -->
+  <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from score_total
+    where id = #{id,jdbcType=INTEGER}
+    AND (state='A' OR state= 'O')
+  </select>
+  
+  <select id="selectByCouId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    id
+    from score_total
+    where cou_id = #{couId,jdbcType=INTEGER}
+    AND (state='A' OR state= 'O')
+  </select>
+  
+  <!-- 过滤查询 -->
+  <select id="listByScoreTotal" parameterType="org.jit.sose.entity.ScoreTotal"
+		resultMap="BaseResultMap">
+		SELECT
+		st.id, 
+		st.cou_id, 
+		st.total_score, 
+		st.student_state, 
+		st.state, 
+		st.created_date, 
+		st.state_date,
+		si.student_name AS studentName,
+		si.student_number AS studentNumber,
+		ci.class_name AS className,
+		ccn.course_no AS courseNo
+		FROM
+			score_total st
+			LEFT JOIN course_class_student_info ccsi ON ccsi.id = st.cou_id
+			LEFT JOIN student_info si ON ccsi.student_info_id = si.id
+			LEFT JOIN course_class_info cci ON ccsi.course_class_info_id = cci.id
+			LEFT JOIN class_info ci ON cci.class_info_id = ci.id
+			LEFT JOIN choice_course_no ccn ON cci.choice_course_no_id = ccn.id
+		WHERE
+			1=1
+		ORDER BY st.id
+	</select>
+	 <!-- 逻辑删除 -->
+  <update id="delete" parameterType="java.lang.Integer" >
+   UPDATE score_total
+		SET state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+  </update>
+  
+   <!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE score_total
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+	
+	<!-- 插入 -->
+  <insert id="insertCouId" parameterType="java.util.List">
+	  INSERT INTO score_total (id, cou_id)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+				(
+					SELECT
+						s.id
+					FROM
+						score_total s
+					WHERE
+						s.cou_id = #{item,jdbcType=INTEGER}
+					AND s.state = 'A'
+				),
+				#{item,jdbcType=INTEGER}
+			) 
+		</foreach>
+			ON DUPLICATE KEY UPDATE cou_id =
+		VALUES
+			(cou_id)
+  </insert>
+  
+  <insert id="insert" parameterType="java.util.List">
+    INSERT INTO score_total (
+   		id,
+		cou_id,
+		total_score
+		)VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.id,jdbcType=INTEGER},
+			#{item.couId,jdbcType=INTEGER},
+			#{item.totalScore,jdbcType=DOUBLE}
+			)
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		total_score = VALUES(total_score)
+  </insert>
+  
+    
+ 	<!--  更新 -->
+  <update id="update" parameterType="org.jit.sose.entity.ScoreTotal">
+    update score_total
+    <set>
+      <if test="couId != null">
+        cou_id = #{couId,jdbcType=INTEGER},
+      </if>
+      <if test="totalScore != null">
+        total_score = #{totalScore,jdbcType=DOUBLE},
+      </if>
+      <if test="studentState != null">
+        student_state = #{studentState,jdbcType=CHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateState" >
+    update score_total
+    set state = 'O',
+    	student_state = #{studentState,jdbcType=CHAR}
+    where id = #{scoreTotalId,jdbcType=INTEGER}
+    AND (state='A' OR state= 'O')
+  </update>
+</mapper>

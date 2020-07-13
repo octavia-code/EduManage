@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+		xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd 
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+	<!-- 配置注解驱动 -->
+	<context:annotation-config />
+	<!-- 注解方法处理器映射器和处理器适配器 -->
+	<!-- <mvc:annotation-driven /> -->
+	
+	
+
+	<!-- 启动自动扫描，使用注解的包，包括子集 注意每次要验证包名是否一致来修改 spring会自动扫描base-package包下或其子包下的java 
+		文件 如果扫描到有spring相关注解的类，则把这些类注册为spring的bean -->
+	<context:component-scan
+		base-package="org.jit.sose.controller" />
+	<context:component-scan
+		base-package="org.jit.sose.view" />
+
+	<!-- 对模型视图名称的解析，即在模型视图名称添加前后缀,在本项目中所有页面跳转交由前端判断 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 在视图逻辑名前面加上prefix，后面加上suffix -->
+		<property name="prefix" value="/" />
+		<property name="suffix" value=".html" />
+		<property name="contentType" value="text/html" />
+	</bean>
+
+	<!-- aop注解注入，让切面类自动装配，配置@aspectJ切面的bean创建代理，强制使用cglib代理，如果不设置，将默认使用jdk的代理，但是jdk的代理是基于接口的 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+
+
+	<mvc:resources location="/img/" mapping="/img/**" />
+	<mvc:resources location="/public/ueditor-1.4.3.3/" mapping="/public/ueditor-1.4.3.3/**"/>
+
+	<!-- 处理静态资源，放行 -->
+	<mvc:default-servlet-handler />
+
+	<!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+	<bean id="mappingJacksonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/html;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+    <!-- 解决返回体中文问号 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+
+	<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<!-- 在业务方法的返回值和权限之间使用@ResponseBody注解表示返回值对象需要转成JSON文本 -->
+		<property name="messageConverters">
+			<list>
+				<ref bean="mappingJacksonHttpMessageConverter" /><!-- json转换器 -->
+			</list>
+		</property>
+		<property name="alwaysUseFullPath" value="true" />
+	</bean>
+
+	<!-- 异常处理 -->
+	<bean
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="Exception">error</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 文件上传 -->
+	<bean name="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8"></property>
+	</bean>
+
+	<!-- 设置定时任务注解驱动 -->
+	<!-- 定时任务配置 scheduler 方式 注解 -->
+	<!-- <task:executor id="executor" pool-size="5" /> <task:scheduler id="scheduler" 
+		pool-size="10" /> <task:annotation-driven executor="executor" scheduler="scheduler" 
+		/> -->
+
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/" />
+			<mvc:exclude-mapping path="/register" />
+			<mvc:exclude-mapping path="/account/login.html" />
+			<mvc:exclude-mapping path="/account/forgetPwd.html" />
+			<mvc:exclude-mapping path="/account/register.html" />
+			<bean class="org.jit.sose.interceptor.LoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+
+</beans>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.RoleMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.Role">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="mykey" property="mykey" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="is_enable" property="enable" jdbcType="BIT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, mykey, name, description, is_enable
+	</sql>
+	
+	<select id="filter" parameterType="org.jit.sose.entity.Role"
+        resultMap="BaseResultMap">
+        SELECT
+            r.id,
+            r.mykey,
+            r.`name`,
+            r.description,
+            r.is_enable,
+            e.code_name AS enableString
+        FROM
+            role r
+        INNER JOIN eecstate e ON e.`table` = 'public'
+        AND e.colm = 'is_enable'
+        AND e.state = 'A'
+        AND r.is_enable = e.`code`
+        WHERE
+            1 = 1
+            <if test="mykey != null">
+                and LOCATE(#{mykey,jdbcType=VARCHAR},r.mykey)
+            </if>
+            <if test="name != null">
+                and LOCATE(#{name,jdbcType=VARCHAR},r.`name`)
+            </if>
+        ORDER BY
+            r.mykey
+    </select>
+	
+	<select id="countByMykey" resultType="java.lang.Integer" parameterType="org.jit.sose.mapper.RoleMapper">
+            SELECT
+			    count(*)
+			FROM
+			    role
+			WHERE
+			    mykey = #{mykey,jdbcType=VARCHAR}
+    </select>
+	
+
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from role
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE role
+		SET is_enable = false
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE role
+		SET is_enable = 0
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	
+	
+	
+	<insert id="insert" parameterType="org.jit.sose.entity.Role">
+			insert into role
+		<trim prefix="(" suffix=")" suffixOverrides=",">		
+				mykey,
+				name,
+			<if test="description != null">
+				description,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">		
+				#{mykey,jdbcType=VARCHAR},
+				#{name,jdbcType=VARCHAR},
+			<if test="description != null">
+				#{description,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="org.jit.sose.entity.Role">
+		update role
+		<set>
+				name = #{name,jdbcType=VARCHAR},
+			<if test="description != null">
+				description = #{description,jdbcType=VARCHAR},
+			</if>
+				is_enable = #{enable,jdbcType=BIT},
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+
+</mapper>

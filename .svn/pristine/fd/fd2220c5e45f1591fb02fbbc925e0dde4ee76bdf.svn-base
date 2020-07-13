@@ -1,0 +1,5 @@
+# 文件上传地址
+UPLOAD_PATH = D://jittest//file//upload
+
+# 虚拟目录
+VIRTUAL_PATH = /upload

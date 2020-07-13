@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+    <script type="text/javascript" src="../public/common.js"></script>
+</head>
+<style>
+    .student-class {
+        font-size: 14px;
+        color: #2db7f5;
+        cursor: pointer; /*让光标呈现为指示链接的指针（一只手）*/
+    }
+
+    .student-class:hover {
+        color: #0f0f0f;
+        text-decoration: underline; /*定义文本下的一条线。*/
+    }
+
+    .score-excellent {
+        color: #2db7f5;
+    }
+
+    .score-flunk {
+        color: red;
+    }
+
+</style>
+<body>
+<div id="test">
+    <layout-header></layout-header>
+    <div id="wrap" style="height: 800px;">
+        <layout-sider></layout-sider>
+        <div class="layout-main">
+            <!-- 多条件查询 -->
+            <div class="qry">
+            </div>
+            <div class="white">&nbsp;</div>
+            <div>
+                <!-- 表格 -->
+                <i-table class="table" border height="auto" width="1400" size='small'
+                         :columns="column" :data="nowData">
+                </i-table>
+                <i-button @click="addAllScoreAssessment">提交</i-button>
+            </div>
+
+
+            <br>
+            <br>
+
+            <!-- solt表格 -->
+            <div>
+                <i-table class="table" border height="auto" width="auto" size='small'
+                         :columns="soltColumn" :data="nowData3" :draggable="true" @on-drag-drop="onDragDrop">
+                    <template slot-scope="{ row, index }" slot="action">
+                        <a style="margin-right: 5px" @click="editNowData3(index)">编辑</a>
+                        <a type="error" size="small" @click="">删除</a>
+                    </template>
+                </i-table>
+            </div>
+
+
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <layout-footer></layout-footer>
+</div>
+<script type="text/javascript" src="./js/test.js"></script>
+</body>
+</html>

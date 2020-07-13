@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.EduPlanMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.EduPlan" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="ep_name" property="epName" jdbcType="VARCHAR" />
+    <result column="year_plan_id" property="yearPlanId" jdbcType="INTEGER" />
+    <result column="school_info_id" property="schoolInfoId" jdbcType="INTEGER" />
+    <result column="specialty_id" property="specialtyId" jdbcType="INTEGER" />
+    <result column="course_prop_id" property="coursePropId" jdbcType="INTEGER" />
+    <result column="course_type_id" property="courseTypeId" jdbcType="INTEGER" />
+    <result column="course_info_id" property="courseInfoId" jdbcType="INTEGER" />
+    <result column="term_info_id" property="termInfoId" jdbcType="INTEGER" />
+    <result column="week_time" property="weekTime" jdbcType="INTEGER" />
+    <result column="seq" property="seq" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+	<sql id="Base_Column_List" >
+    id, ep_name, year_plan_id, school_info_id ,specialty_id, course_prop_id, course_type_id, course_info_id, 
+    term_info_id, week_time, seq, user_id, created_date, state_date, state
+  </sql>
+  
+  <sql id="Name_Column_List" >
+    e.id, e.ep_name, e.year_plan_id, e.school_info_id ,e.specialty_id, e.course_prop_id, e.course_type_id, e.course_info_id, 
+    e.term_info_id, e.week_time, e.seq, e.user_id, e.created_date, e.state_date, e.state
+  </sql>
+  
+  <select id="listByCourseInfo" parameterType="org.jit.sose.entity.EduPlan"
+        resultMap="BaseResultMap">
+        SELECT
+		    <include refid="Name_Column_List"/>,
+		    y.year_name AS yearName,
+		    si.school_name AS schoolName,
+		    s.subject_name AS subjectName,
+		    cp.prop_name AS propName,
+		    ct.type_name AS typeName,
+		    ci.course_name AS courseName,
+            t.term_name AS termName
+		FROM
+		    edu_plan e
+		LEFT JOIN year_plan y ON e.year_plan_id = y.id
+		LEFT JOIN school_info si ON e.school_info_id = si.id
+		LEFT JOIN specialty s ON e.specialty_id = s.id
+		LEFT JOIN course_prop cp ON e.course_prop_id = cp.id
+		LEFT JOIN course_type ct ON e.course_type_id = ct.id
+		LEFT JOIN course_info ci ON e.course_info_id = ci.id
+		LEFT JOIN term_info t ON e.term_info_id = t.id
+		WHERE
+		    1 = 1
+	    <if test="epName != null">
+           AND LOCATE(#{epName},e.ep_name)
+        </if>
+        <if test="yearPlanId != null" >
+           AND e.year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+         </if>
+         <if test="schoolInfoId != null" >
+           AND e.school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+         </if>
+         <if test="specialtyId != null" >
+           AND e.specialty_id = #{specialtyId,jdbcType=INTEGER}
+         </if>
+         <if test="coursePropId != null" >
+           AND e.course_prop_id = #{coursePropId,jdbcType=INTEGER}
+         </if>
+         <if test="courseTypeId != null" >
+           AND e.course_type_id = #{courseTypeId,jdbcType=INTEGER}
+         </if>
+         <if test="courseInfoId != null" >
+           AND e.course_info_id = #{courseInfoId,jdbcType=INTEGER}
+         </if>
+         <if test="termInfoId != null" >
+           AND e.term_info_id = #{termInfoId,jdbcType=INTEGER}
+         </if>
+		AND e.state = 'A'
+    </select>
+  
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM edu_plan
+		WHERE id = #{id,jdbcType=INTEGER}
+	</select>
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE edu_plan SET
+		state='X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="deleteSelection" parameterType="java.util.List">
+       UPDATE edu_plan
+        SET state = 'X'
+        WHERE
+            id IN
+            <!--每次从list集合中取出数据放入id中 -->
+            <foreach collection="list"  item="id"  index="index"
+              separator="," open="(" close=")">
+              #{id,jdbcType=INTEGER}
+            </foreach>
+    </update>
+	
+	
+	<insert id="insert" parameterType="org.jit.sose.entity.EduPlan" >
+	
+	<!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+            SELECT
+			    count(*) AS count
+			FROM
+			    edu_plan
+			WHERE
+			    state = 'A'
+			AND ep_name = #{epName,jdbcType=VARCHAR}
+        </selectKey>
+        
+	    <!-- 如果等于0即不存在 才插入 -->
+        <if test="count == 0">
+			INSERT INTO edu_plan
+		    <trim prefix="(" suffix=")" suffixOverrides="," >
+		        ep_name,
+		        year_plan_id,
+		        school_info_id,
+		        specialty_id,
+		        course_prop_id,
+		        course_type_id,
+		        course_info_id,
+		        term_info_id,
+		        week_time,
+		      <if test="seq != null" >
+		        seq,
+		      </if>
+		        user_id
+		    </trim>
+		    <trim prefix="values (" suffix=")" suffixOverrides="," >
+		        #{epName,jdbcType=VARCHAR},
+		        #{yearPlanId,jdbcType=INTEGER},
+		        #{schoolInfoId,jdbcType=INTEGER},
+		        #{specialtyId,jdbcType=INTEGER},
+		        #{coursePropId,jdbcType=INTEGER},
+		        #{courseTypeId,jdbcType=INTEGER},
+		        #{courseInfoId,jdbcType=INTEGER},
+		        #{termInfoId,jdbcType=INTEGER},
+		        #{weekTime,jdbcType=INTEGER},
+		      <if test="seq != null" >
+		        #{seq,jdbcType=INTEGER},
+		      </if>
+		        #{userId,jdbcType=INTEGER},
+		    </trim>
+		</if>
+		
+		<!-- 若已存在数据，将该数据更新 -->
+		<if test="count > 0">
+			UPDATE edu_plan
+		    <set >
+		      <if test="yearPlanId != null" >
+		        year_plan_id = #{yearPlanId,jdbcType=INTEGER},
+		      </if>
+		      <if test="schoolInfoId != null" >
+	            school_info_id = #{schoolInfoId,jdbcType=INTEGER},
+	          </if>
+		      <if test="specialtyId != null" >
+		        specialty_id = #{specialtyId,jdbcType=INTEGER},
+		      </if>
+		      <if test="coursePropId != null" >
+		        course_prop_id = #{coursePropId,jdbcType=INTEGER},
+		      </if>
+		      <if test="courseTypeId != null" >
+		        course_type_id = #{courseTypeId,jdbcType=INTEGER},
+		      </if>
+		      <if test="courseInfoId != null" >
+		        course_info_id = #{courseInfoId,jdbcType=INTEGER},
+		      </if>
+		      <if test="termInfoId != null" >
+		        term_info_id = #{termInfoId,jdbcType=INTEGER},
+		      </if>
+		      <if test="weekTime != null" >
+		        week_time = #{weekTime,jdbcType=INTEGER},
+		      </if>
+		      <if test="seq != null" >
+		        seq = #{seq,jdbcType=INTEGER},
+		      </if>
+		      <if test="userId != null" >
+		        user_id = #{userId,jdbcType=INTEGER},
+		      </if>
+		    </set>
+	    	where ep_name = #{epName,jdbcType=VARCHAR}
+		</if>
+	
+  </insert>
+  
+	<update id="update" parameterType="org.jit.sose.entity.EduPlan">
+		UPDATE edu_plan
+	    <set >
+	      <if test="yearPlanId != null" >
+	        year_plan_id = #{yearPlanId,jdbcType=INTEGER},
+	      </if>
+	      <if test="schoolInfoId != null" >
+            school_info_id = #{schoolInfoId,jdbcType=INTEGER},
+          </if>
+	      <if test="specialtyId != null" >
+	        specialty_id = #{specialtyId,jdbcType=INTEGER},
+	      </if>
+	      <if test="coursePropId != null" >
+	        course_prop_id = #{coursePropId,jdbcType=INTEGER},
+	      </if>
+	      <if test="courseTypeId != null" >
+	        course_type_id = #{courseTypeId,jdbcType=INTEGER},
+	      </if>
+	      <if test="courseInfoId != null" >
+	        course_info_id = #{courseInfoId,jdbcType=INTEGER},
+	      </if>
+	      <if test="termInfoId != null" >
+	        term_info_id = #{termInfoId,jdbcType=INTEGER},
+	      </if>
+	      <if test="weekTime != null" >
+	        week_time = #{weekTime,jdbcType=INTEGER},
+	      </if>
+	      <if test="seq != null" >
+	        seq = #{seq,jdbcType=INTEGER},
+	      </if>
+	      <if test="userId != null" >
+	        user_id = #{userId,jdbcType=INTEGER},
+	      </if>
+	    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+	
+	
+	
+</mapper>

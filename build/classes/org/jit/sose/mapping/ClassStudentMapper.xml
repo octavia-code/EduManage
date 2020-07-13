@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ClassStudentMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.ClassStudent">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="class_info_id" property="classInfoId" jdbcType="INTEGER" />
+		<result column="student_info_id" property="studentInfoId"
+			jdbcType="INTEGER" />
+		<result column="student_state" property="studentState"
+			jdbcType="CHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, class_info_id, student_info_id, student_state, remark,
+		created_date,
+		state_date, state
+	</sql>
+	<select id="selectStudentStateList" parameterType="org.jit.sose.entity.ClassStudent"
+		resultMap="BaseResultMap">
+			SELECT
+				id,
+				table_name,
+				CODE,
+				code_name AS codeName,
+				state
+			FROM
+				eecstate
+			WHERE
+				`table` = 'class_student'
+			AND state = 'A'
+			ORDER BY
+				id
+		<if test="codeName != null">
+			AND LOCATE(#{codeName},code_name)
+		</if>
+	</select>
+	<!-- 过滤查询班级学生信息 -->
+	<select id="listByClassStudent" parameterType="org.jit.sose.entity.ClassStudent"
+		resultMap="BaseResultMap">
+			SELECT
+				stu.id,
+				ci.class_name AS className,
+				stu.student_number AS studentNumber,
+				stu.student_name AS studentName,
+				eec.code_name AS codeName,
+				sp.subject_name AS subjectName,
+				sch.school_name AS schoolName,
+			  yp.year_name AS yearName
+			FROM
+				student_info stu
+			LEFT JOIN class_student cs ON cs.student_info_id = stu.id
+			LEFT JOIN eecstate eec ON eec.`table` = 'class_student'
+			AND eec.`code` = cs.student_state
+			AND eec.colm = 'student_state'
+			LEFT JOIN class_info ci ON ci.id = cs.class_info_id
+			LEFT JOIN specialty sp ON sp.id = ci.specialty_id
+			LEFT JOIN school_info sch ON sch.id = sp.school_info_id
+			LEFT JOIN year_plan yp ON yp.id = ci.year_plan_id
+			WHERE
+				cs.state = 'A'
+			AND ci.state = 'A'
+			AND sp.state = 'A'
+			AND sch.state = 'A'
+			AND eec.state = 'A'		
+		<if test="yearPlanId != null">
+			AND year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+		</if>
+		<if test="schoolInfoId != null">
+			AND school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+		</if>
+		<if test="specialtyId != null">
+			AND sp.id = #{specialtyId,jdbcType=INTEGER}
+		</if>
+		<if test="classInfoId != null">
+			AND ci.id = #{classInfoId,jdbcType=INTEGER}
+		</if>
+		ORDER BY
+		stu.id
+	</select>
+	<!-- 过滤查询班级学生信息 -->
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from class_student
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE class_student
+		SET state
+		= 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+	<!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE class_student
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	<!-- 插入 -->
+	<insert id="insert" parameterType="org.jit.sose.entity.ClassStudent">
+		<!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据 2、要求实体类中包含count属性即 AS 
+			后的属性,若实体类中包含count，就换一个别的 -->
+		<selectKey keyProperty="count" resultType="java.lang.Integer"
+			order="BEFORE">
+			SELECT
+			count(*) AS count
+			FROM
+			class_student
+			WHERE
+			state = 'A'
+			AND
+			class_info_id = #{classInfoId,jdbcType=VARCHAR}
+			AND student_info_id =
+			#{studentInfoId,jdbcType=INTEGER}
+		</selectKey>
+
+		<!-- 如果等于0即不存在 才插入 -->
+		<if test="count == 0">
+			INSERT INTO class_student
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				class_info_id,
+				student_info_id,
+				student_state,
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				#{classInfoId,jdbcType=INTEGER},
+				#{studentInfoId,jdbcType=INTEGER},
+				#{studentState,jdbcType=CHAR},
+			</trim>
+		</if>
+
+		<!-- 若已存在数据，根据唯一属性值将该数据更新（唯一属性值就不要更新了） -->
+		<if test="count > 0">
+			UPDATE class_student
+			<set>
+				student_state = #{studentState,jdbcType=CHAR},
+			</set>
+			WHERE
+			class_info_id = #{classInfoId,jdbcType=VARCHAR}
+			AND
+			student_info_id = #{studentInfoId,jdbcType=INTEGER}
+		</if>
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="org.jit.sose.entity.ClassStudent">
+		update class_student
+		<set>
+			student_state = #{studentState,jdbcType=CHAR},
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<select id="listByClassInfoId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+	SELECT
+		cs.student_state,
+		si.student_name AS studentName,
+		ci.class_name AS className
+	FROM
+		class_student cs
+	LEFT JOIN student_info si ON cs.student_info_id = si.id
+	LEFT JOIN class_info ci ON cs.class_info_id = ci.id
+	WHERE
+		cs.class_info_id = #{classInfoId,jdbcType=INTEGER}
+	AND cs.state = 'A'
+	</select>
+	<insert id="insertOrUpdateList" parameterType="java.util.Map">
+	INSERT INTO class_student (
+		class_info_id,
+		student_info_id,
+		student_state
+	)
+	<foreach collection="classStudentList" item="classStudent"  separator=",">
+	VALUES
+		(
+			#{classInfoId,jdbcType=INTEGER},
+			(
+				SELECT
+					id
+				FROM
+					student_info
+				WHERE
+					student_info.student_name = #{classStudent.studentName,jdbcType=VARCHAR}
+			),
+			#{classStudent.studentState,jdbcType=CHAR}
+		)
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		      student_info_id = VALUES(student_info.id)
+	</insert>
+</mapper>

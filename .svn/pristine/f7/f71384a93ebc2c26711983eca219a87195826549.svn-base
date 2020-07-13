@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CourseInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="course_type_id" property="courseTypeId" jdbcType="INTEGER" />
+		<result column="course_code" property="courseCode" jdbcType="VARCHAR" />
+		<result column="course_name" property="courseName" jdbcType="VARCHAR" />
+		<result column="scord" property="scord" jdbcType="DOUBLE" />
+		<result column="theory_dur" property="theoryDur" jdbcType="INTEGER" />
+		<result column="exp_dur" property="expDur" jdbcType="INTEGER" />
+		<result column="total_dur" property="totalDur" jdbcType="INTEGER" />
+		<result column="outside_dru" property="outsideDru" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,course_type_id, course_code, course_name, scord, theory_dur, exp_dur,
+		total_dur,outside_dru, remark
+	</sql>
+	
+	<sql id="Select_Column_List">
+        ${tableName}.id,${tableName}.course_type_id, ${tableName}.course_code, ${tableName}.course_name, 
+        ${tableName}.scord, ${tableName}.theory_dur, ${tableName}.exp_dur,${tableName}.total_dur,
+        ${tableName}.outside_dru, ${tableName}.remark
+    </sql>
+	<select id="listCourseInfo" resultMap="BaseResultMap">
+	   SELECT
+		    id,
+		    course_name,
+		    course_code
+		FROM
+		    course_info
+		WHERE
+		    state = 'A'
+		ORDER BY
+		    course_code
+	</select>
+	
+	<select id="listByCourseInfo" parameterType="org.jit.sose.entity.CourseInfo"
+        resultMap="BaseResultMap">
+        SELECT
+            <include refid="Select_Column_List">
+                <property name="tableName" value="i"/>
+            </include>,
+            t.type_name AS typeName
+        FROM
+            course_info i
+            INNER JOIN course_type t ON i.course_type_id = t.id
+        WHERE
+            i.state = 'A'
+        <if test="courseTypeId != null">
+            and i.course_type_id = #{courseTypeId,jdbcType=INTEGER}
+        </if>
+        <if test="courseCode != null">
+            and LOCATE(#{courseCode},i.course_code)
+        </if>
+        <if test="courseName != null">
+            and LOCATE(#{courseName},i.course_name)
+        </if>
+        ORDER BY i.course_code
+    </select>
+	
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+			course_info
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</select>
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE course_info
+		SET state = 'X'
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE course_info
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+	
+    <select id="countByCourseInfo" parameterType="org.jit.sose.entity.CourseInfo"
+        resultType="java.lang.Integer">
+        SELECT
+            count(*)
+        FROM
+            course_info
+        WHERE
+            state = 'A'
+        AND course_code = #{courseCode,jdbcType=VARCHAR}
+        <if test="id != null">
+            AND id != #{id,jdbcType=INTEGER}
+        </if>
+    </select>	
+	
+	<insert id="insert" parameterType="org.jit.sose.entity.CourseInfo">
+		INSERT INTO course_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+		        course_type_id,
+				course_code,
+				course_name,
+				scord,
+				theory_dur,
+				exp_dur,
+				total_dur,
+				outside_dru,
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+		        #{courseTypeId,jdbcType=INTEGER},
+				#{courseCode,jdbcType=VARCHAR},
+				#{courseName,jdbcType=VARCHAR},
+				#{scord,jdbcType=DOUBLE},
+				#{theoryDur,jdbcType=INTEGER},
+				#{expDur,jdbcType=INTEGER},
+				#{totalDur,jdbcType=INTEGER},
+				#{outsideDru,jdbcType=INTEGER},
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.CourseInfo">
+		UPDATE course_info
+		<set>
+			<if test="courseTypeId != null" >
+	            course_type_id = #{courseTypeId,jdbcType=INTEGER},
+	        </if>
+			<if test="courseName != null">
+				course_name = #{courseName,jdbcType=VARCHAR},
+			</if>
+			<if test="scord != null">
+				scord = #{scord,jdbcType=DOUBLE},
+			</if>
+			<if test="theoryDur != null">
+				theory_dur = #{theoryDur,jdbcType=INTEGER},
+			</if>
+			<if test="expDur != null">
+				exp_dur = #{expDur,jdbcType=INTEGER},
+			</if>
+			<if test="totalDur != null">
+				total_dur = #{totalDur,jdbcType=INTEGER},
+			</if>
+			<if test="outsideDru != null">
+				outside_dru = #{outsideDru,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		WHERE
+			 id = #{id,jdbcType=INTEGER}
+	</update>
+	
+</mapper>

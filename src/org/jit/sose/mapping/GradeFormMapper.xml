@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jit.sose.mapper.GradeFormMapper">
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.GradeForm">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="school_info_id" jdbcType="INTEGER" property="schoolInfoId" />
+    <result column="choice_course_no_id" jdbcType="INTEGER" property="choiceCourseNoId" />
+    <result column="course_class_info_id" jdbcType="INTEGER" property="courseClassInfoId" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" />
+    <result column="state_date" jdbcType="TIMESTAMP" property="stateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, school_info_id, choice_course_no_id, course_class_info_id, state, created_date, 
+    state_date
+  </sql>
+  
+  <select id="selectByGradeFromId" parameterType="org.jit.sose.entity.GradeForm" resultType="java.lang.Integer">
+	  	SELECT
+			id
+		FROM
+			grade_form
+		WHERE
+		state='A'
+		AND	choice_course_no_id = #{choiceCourseNoId,jdbcType=INTEGER}
+		AND course_class_info_id = #{courseClassInfoId,jdbcType=INTEGER}
+		AND school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectGradeFormList" resultMap="BaseResultMap">
+ 	SELECT
+		gf.id, 
+		gf.school_info_id, 
+		gf.choice_course_no_id, 
+		gf.course_class_info_id, 
+		gf.state, 
+		gf.created_date, 
+    	gf.state_date,
+    	si.school_name AS schoolName,
+    	ci.class_name AS className,
+    	ccn.course_no AS courseNo,
+    	sti.staff_name AS staffName,
+    	coui.course_name AS courseName,
+    	coui.scord AS scord,
+			coui.id 
+		FROM
+			grade_form gf
+			LEFT JOIN school_info si ON gf.school_info_id = si.id
+			LEFT JOIN course_class_info cci ON cci.id = gf.course_class_info_id
+			LEFT JOIN class_info ci ON cci.class_info_id = ci.id
+			LEFT JOIN choice_course_no ccn ON ccn.id = gf.choice_course_no_id
+			LEFT JOIN course_staff cs ON ccn.course_staff_id = cs.id
+			LEFT JOIN staff_info sti ON cs.staff_id = sti.id
+			LEFT JOIN course_info coui ON cs.course_info_id = coui.id
+
+		where 
+			1=1
+		ORDER BY gf.id
+  </select>
+  
+  <!-- 过滤查询 -->
+  <select id="listByGradeForm" parameterType="org.jit.sose.entity.GradeForm"
+		resultType="org.jit.sose.entity.GradeForm">
+		SELECT
+			gf.id, 
+			gf.school_info_id, 
+			gf.choice_course_no_id, 
+			gf.course_class_info_id, 
+			gf.state, 
+			gf.created_date, 
+	    	gf.state_date,
+	    	si.school_name AS schoolName,
+			ccn.course_no AS courseNo,
+			ci.class_name AS className,
+			sti.staff_name AS staffName,
+			co.outline_name AS outlineName,
+			yt.term_name AS termName
+		FROM
+			grade_form gf
+			LEFT JOIN school_info si ON gf.school_info_id = si.id
+			LEFT JOIN course_class_info cci ON cci.id = gf.course_class_info_id
+			LEFT JOIN class_info ci ON cci.class_info_id = ci.id
+			LEFT JOIN choice_course_no ccn ON ccn.id = gf.choice_course_no_id
+			LEFT JOIN staff_info sti ON ccn.staff_info_id = sti.id
+			LEFT JOIN course_outline co ON ccn.course_outline_id = co.id
+			LEFT JOIN year_term yt ON ccn.year_term_id = yt.id
+		WHERE
+			1 = 1
+			<if test="schoolName != null">
+				AND LOCATE(#{schoolName},si.school_name)
+			</if>
+			<if test="courseName != null">
+				AND LOCATE(#{courseName},coui.course_name)
+			</if>
+			<if test="courseNo != null">
+				AND LOCATE(#{courseNo},ccn.course_no)
+			</if>
+			<if test="staffName != null">
+				AND LOCATE(#{staffName},sti.staff_name)
+			</if>
+		ORDER BY gf.id
+	</select>
+	
+  <!-- 根据学期信息标识id查询学期信息 -->
+   <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+   	SELECT
+		gf.id, 
+		gf.school_info_id, 
+		gf.choice_course_no_id, 
+		gf.course_class_info_id, 
+		gf.state, 
+		gf.created_date, 
+    	gf.state_date,
+    	si.school_name AS schoolName,
+    	ci.class_name AS className,
+    	ccn.course_no AS courseNo,
+    	sti.staff_name AS staffName,
+    	coui.course_name AS courseName,
+    	coui.scord AS scord,
+			coui.id 
+		FROM
+			grade_form gf
+			LEFT JOIN school_info si ON gf.school_info_id = si.id
+			LEFT JOIN course_class_info cci ON cci.id = gf.course_class_info_id
+			LEFT JOIN class_info ci ON cci.class_info_id = ci.id
+			LEFT JOIN choice_course_no ccn ON ccn.id = gf.choice_course_no_id
+			LEFT JOIN course_staff cs ON ccn.course_staff_id = cs.id
+			LEFT JOIN staff_info sti ON cs.staff_id = sti.id
+			LEFT JOIN course_info coui ON cs.course_info_id = coui.id
+
+		where 
+			1=1
+			AND gf.id = #{id,jdbcType=INTEGER}
+		ORDER BY gf.id
+  </select>
+  
+  <!-- 逻辑删除 -->
+  <update id="delete" parameterType="java.lang.Integer" >
+   UPDATE grade_form
+		SET state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+  </update>
+  
+   <!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE grade_form
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+	
+	<select id= "countByGradeForm" resultType="java.lang.Integer"
+			parameterType="org.jit.sose.entity.GradeForm">
+		SELECT
+			COUNT(*)
+		FROM
+			grade_form
+		WHERE
+			state = 'A'
+		AND school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+		AND choice_course_no_id = #{choiceCourseNoId,jdbcType=INTEGER}
+		AND course_class_info_id = #{courseClassInfoId,jdbcType=INTEGER}
+	</select>
+	
+	
+  <insert id="insert" parameterType="org.jit.sose.entity.GradeForm">
+    insert into grade_form
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="schoolInfoId != null">
+        school_info_id,
+      </if>
+      <if test="choiceCourseNoId != null">
+        choice_course_no_id,
+      </if>
+      <if test="courseClassInfoId != null">
+        course_class_info_id,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="createdDate != null">
+        created_date,
+      </if>
+      <if test="stateDate != null">
+        state_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="schoolInfoId != null">
+        #{schoolInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="choiceCourseNoId != null">
+        #{choiceCourseNoId,jdbcType=INTEGER},
+      </if>
+      <if test="courseClassInfoId != null">
+        #{courseClassInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.GradeForm">
+    update grade_form
+    <set>
+      <if test="schoolInfoId != null">
+        school_info_id = #{schoolInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="choiceCourseNoId != null">
+        choice_course_no_id = #{choiceCourseNoId,jdbcType=INTEGER},
+      </if>
+      <if test="courseClassInfoId != null">
+        course_class_info_id = #{courseClassInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+ 
+
+  
+</mapper>

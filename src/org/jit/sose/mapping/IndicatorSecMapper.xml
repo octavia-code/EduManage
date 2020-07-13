@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.IndicatorSecMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.IndicatorSec">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="year_plan_id" property="yearPlanId" jdbcType="INTEGER" />
+		<result column="indicator_first_id" property="indicatorFirstId" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, year_plan_id, indicator_first_id, content, user_id, seq, create_date, state_date, state
+	</sql>
+	
+	<sql id="SELECT_Column_List">
+        ${tableName}.id, ${tableName}.year_plan_id, ${tableName}.indicator_first_id, ${tableName}.content, ${tableName}.user_id, ${tableName}.seq, ${tableName}.create_date, ${tableName}.state_date, ${tableName}.state
+    </sql>
+	
+	<!-- 查询二级指标信息id和二级指标内容集合 -->
+	<select id="selectIndicatorSecList" resultMap="BaseResultMap">
+        SELECT
+		    i.id,
+		    i.content,
+		    i.seq
+		FROM
+		    indicator_sec i
+		WHERE
+		    i.state = 'A'
+		ORDER BY
+		    i.seq
+    </select>
+	
+	<!-- 过滤查询二级指标信息 -->
+	<select id="listByIndicatorSec" resultMap="BaseResultMap">
+			SELECT
+				i.id,
+				i.year_plan_id,
+				i.indicator_first_id,
+				i.content,
+				i.user_id,
+				i.seq,
+				i.create_date,
+				i.state_date,
+				i.state,
+				f.title AS title,
+				y.year_name AS yearName
+			FROM
+				indicator_sec i
+			LEFT JOIN indicator_first f ON i.indicator_first_id = f.id
+			LEFT JOIN year_plan y ON i.year_plan_id = y.id
+			WHERE
+				i.state = 'A'
+				
+			AND f.state = 'A'
+			AND y.state = 'A'
+			
+			AND i.year_plan_id = f.year_plan_id 
+			<if test="yearPlanId != null">
+			AND f.year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+			</if>
+			<if test="indicatorFirstId != null">
+				AND i.indicator_first_id = #{indicatorFirstId,jdbcType=INTEGER}
+			</if>
+	        ORDER BY i.seq
+	</select>
+	
+	<!-- 根据二级指标信息标识id查询二级指标信息 -->
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+			indicator_sec
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE indicator_sec
+		SET state = 'X'
+		WHERE id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE indicator_sec
+	   SET state = 'X'
+	   WHERE id IN
+	   <!--每次从list集合中取出数据放入id中 -->
+	   <foreach collection="list"  item="id"  index="index"  separator=","  open="(" close=")">
+		    #{id,jdbcType=INTEGER}
+	   </foreach>
+	</update>
+	
+	<!-- 插入 -->
+	<insert id="insert" parameterType="org.jit.sose.entity.IndicatorSec">
+		INSERT INTO indicator_sec
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				year_plan_id,
+				indicator_first_id,
+				content,
+				user_id,
+			<if test="seq != null">
+				seq,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+				#{yearPlanId,jdbcType=INTEGER},
+				#{indicatorFirstId,jdbcType=INTEGER},
+				#{content,jdbcType=VARCHAR},
+				#{userId,jdbcType=INTEGER},
+			<if test="content != null">
+				#{seq,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="org.jit.sose.entity.IndicatorSec" >
+    update indicator_sec
+    <set >
+      <if test="yearPlanId != null" >
+        year_plan_id = #{yearPlanId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorFirstId != null" >
+        indicator_first_id = #{indicatorFirstId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+        seq = #{seq,jdbcType=INTEGER},
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+	
+	
+</mapper>

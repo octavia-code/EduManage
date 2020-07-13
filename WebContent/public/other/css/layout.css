@@ -1,0 +1,26 @@
+ /* 页面侧边，顶部，底部layout布局样式 */
+/*#wrap {
+    overflow:hidden;// (这行代码是重点，否则你会看到页面很长很长)
+    padding:0;
+    padding-left:200px;（内补丁）
+}
+
+#layout-sider,.layout-main {
+    height:auto;
+    margin-bottom:-10000px;（外补丁）
+    padding-bottom:10000px;（内补丁）
+}
+
+#layout-sider {
+    display:inline;
+    float:left;
+    width:200px;
+    margin-left:-200px;（外补丁）
+    background:#333;
+}
+
+.layout-main{
+    float:right;
+    width:100%;
+    border: 24px solid #FFF5EE;
+} */

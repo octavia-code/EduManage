@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>修改密码</title>
+	<script type="text/javascript" src="pub/loginUtil.js"></script>
+	<link rel="stylesheet" type="text/css" href="static/css/person.css">
+</head>
+<body>
+<div id="person" class="whole">
+	<div class="head"></div>
+	<div class="container">
+		<div class="container-main">
+			<div class="div_item">
+				<div class="div_input div_left">
+					<span class="span_show">用&nbsp;&nbsp;户&nbsp;&nbsp;名:</span>
+					<i-input type="text" placeholder="请输入用户名" v-model="loginName"
+							 size="large" clearable class="long_input" readonly/>
+				</div>
+				<div class="error_font div_right">{{loginNameFindErr}}</div>
+			</div>
+
+			<div class="div_item">
+				<div class="div_input div_left">
+					<span class="span_show">手机号码: </span>
+					<i-input type="text" placeholder="请输入绑定的手机号码" v-model="phone"
+							 size="large" clearable class="long_input" readonly/>
+				</div>
+			</div>
+
+			<div class="div_item">
+				<div class="div_input div_left">
+					<span class="span_show">手机验证码: </span> <span> <i-input
+						type="text" placeholder="请输入验证码" @on-blur="checkMsgCode()"
+						v-model="msgCode" size="large" clearable class="short_input" />
+						</span> <span> <i-button size="large" @click="sendMessage"
+												 :disabled="btnDisabled" class="code_button">{{btnSendCode}}</i-button>
+						</span>
+				</div>
+				<div class="error_font div_right">{{msgCodeErr}}</div>
+			</div>
+
+			<div class="div_item">
+				<div class="div_input div_left">
+					<span class="span_show">密&nbsp;&nbsp;&nbsp;&nbsp;码:</span>
+					<i-input type="password" placeholder="请输入密码" v-model="password"
+							 size="large" clearable class="long_input"
+							 @on-blur="checkPassword()" />
+				</div>
+				<div class="error_font div_right">{{passwordErr}}</div>
+			</div>
+
+			<div class="div_item">
+				<div class="div_input div_left">
+					<span class="span_show">密码确认:</span>
+					<i-input type="password" placeholder="请再次输入密码" v-model="password1"
+							 size="large" clearable="true" class="long_input"
+							 @on-blur="compare()" />
+				</div>
+				<div class="error_font div_right">{{passwordErr1}}</div>
+			</div>
+
+			<div class="div_item">
+				<div class="div_input div_left">
+					<i-button id="btnForget" type="info" @click="checkForget" long
+							  class="forget_button">重置密码 </i-button>
+					<!-- <i-button data-dismiss="modal" class="close_button" onclick="refreshLogin()">取消
+                </i-button> -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+<script src="static/js/person.js"></script>
+</html>

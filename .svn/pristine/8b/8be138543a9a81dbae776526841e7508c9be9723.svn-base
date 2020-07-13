@@ -1,0 +1,26 @@
+package org.jit.sose.service;
+
+import java.util.List;
+
+import org.jit.sose.entity.UserMenu;
+import org.jit.sose.entity.vo.MenuTreeVo;
+
+import com.github.pagehelper.PageInfo;
+
+public interface UserMenuService {
+
+	List<MenuTreeVo> listByUserMenuTree(Integer userId);
+
+	/**
+	 * 查询用户信息集合
+	 * 
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	PageInfo<UserMenu> selectPageInfo(Integer pageNum, Integer pageSize);
+
+	List<MenuTreeVo> selectParentMenu();
+
+	String editUserMenu(Integer userId, List<Object> menuIdList);
+}

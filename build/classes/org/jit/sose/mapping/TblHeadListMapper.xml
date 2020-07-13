@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.TblHeadListMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.TblHeadList" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="plan_id" property="planId" jdbcType="INTEGER" />
+    <result column="col_name" property="colName" jdbcType="VARCHAR" />
+    <result column="col_nbr" property="colNbr" jdbcType="INTEGER" />
+    <result column="row_nbr" property="rowNbr" jdbcType="INTEGER" />
+    <result column="is_empty" property="isEmpty" jdbcType="BIT" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="col_start" property="colStart" jdbcType="INTEGER" />
+    <result column="col_end" property="colEnd" jdbcType="INTEGER" />
+    <result column="row_start" property="rowStart" jdbcType="INTEGER" />
+    <result column="row_end" property="rowEnd" jdbcType="INTEGER" />
+    <result column="course_name" property="courseName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, plan_id, col_name, col_nbr, row_nbr, is_empty, user_id, created_date, state, 
+    state_date, col_start, col_end, row_start, row_end, course_name
+  </sql>
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tbl_head_list
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <update id="delete" parameterType="java.lang.Integer">
+		UPDATE tbl_head_list
+		SET state = 'X'
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</update>
+  <update id="deleteSelection" parameterType="java.util.List" >
+    UPDATE tbl_head_list
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+  </update>
+  <insert id="insert" parameterType="org.jit.sose.entity.TblHeadList" >
+    insert into tbl_head_list
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        plan_id,
+      </if>
+      <if test="colName != null" >
+        col_name,
+      </if>
+      <if test="colNbr != null" >
+        col_nbr,
+      </if>
+      <if test="rowNbr != null" >
+        row_nbr,
+      </if>
+      <if test="isEmpty != null" >
+        is_empty,
+      </if>
+        
+      <if test="createdDate != null" >
+        created_date,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="stateDate != null" >
+        state_date,
+      </if>
+      <if test="colStart != null" >
+        col_start,
+      </if>
+      <if test="colEnd != null" >
+        col_end,
+      </if>
+      <if test="rowStart != null" >
+        row_start,
+      </if>
+      <if test="rowEnd != null" >
+        row_end,
+      </if>
+      <if test="courseName != null" >
+        course_name,
+      </if>
+      user_id,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="planId != null" >
+        #{planId,jdbcType=INTEGER},
+      </if>
+      <if test="colName != null" >
+        #{colName,jdbcType=VARCHAR},
+      </if>
+      <if test="colNbr != null" >
+        #{colNbr,jdbcType=INTEGER},
+      </if>
+      <if test="rowNbr != null" >
+        #{rowNbr,jdbcType=INTEGER},
+      </if>
+      <if test="isEmpty != null" >
+        #{isEmpty,jdbcType=BIT},
+      </if>
+      <if test="createdDate != null" >
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="stateDate != null" >
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="colStart != null" >
+        #{colStart,jdbcType=INTEGER},
+      </if>
+      <if test="colEnd != null" >
+        #{colEnd,jdbcType=INTEGER},
+      </if>
+      <if test="rowStart != null" >
+        #{rowStart,jdbcType=INTEGER},
+      </if>
+      <if test="rowEnd != null" >
+        #{rowEnd,jdbcType=INTEGER},
+      </if>
+      <if test="courseName != null" >
+        #{courseName,jdbcType=VARCHAR},
+      </if>
+      1
+    </trim>
+  </insert>
+  <update id="update" parameterType="org.jit.sose.entity.TblHeadList" >
+    update tbl_head_list
+    <set >
+      <if test="planId != null" >
+        plan_id = #{planId,jdbcType=INTEGER},
+      </if>
+      <if test="colName != null" >
+        col_name = #{colName,jdbcType=VARCHAR},
+      </if>
+      <if test="colNbr != null" >
+        col_nbr = #{colNbr,jdbcType=INTEGER},
+      </if>
+      <if test="rowNbr != null" >
+        row_nbr = #{rowNbr,jdbcType=INTEGER},
+      </if>
+      <if test="isEmpty != null" >
+        is_empty = #{isEmpty,jdbcType=BIT},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="colStart != null" >
+        col_start = #{colStart,jdbcType=INTEGER},
+      </if>
+      <if test="colEnd != null" >
+        col_end = #{colEnd,jdbcType=INTEGER},
+      </if>
+      <if test="rowStart != null" >
+        row_start = #{rowStart,jdbcType=INTEGER},
+      </if>
+      <if test="rowEnd != null" >
+        row_end = #{rowEnd,jdbcType=INTEGER},
+      </if>
+      <if test="courseName != null" >
+        course_name = #{courseName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="listByTblHeadList" parameterType="org.jit.sose.entity.TblHeadList"
+		resultMap="BaseResultMap">
+		SELECT
+			*
+		FROM
+			tbl_head_list
+		WHERE
+			state = 'A'
+		<if test="courseName != null">
+			and LOCATE(#{courseName},course_name)
+		</if>
+		<if test="colName != null">
+		    and LOCATE(#{colName},col_name)
+		</if>
+		ORDER BY id
+	</select>
+</mapper>

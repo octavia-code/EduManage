@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.MenuRoleMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.MenuRole" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="menu_id" property="menuId" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, menu_id, role_id
+  </sql>
+  
+  <sql id="Select_Column_List" >
+    ${tableName}.id,${tableName}.menu_id, ${tableName}.role_id
+  </sql>
+  
+  <select id="listByMenuRole" resultMap="BaseResultMap" parameterType="org.jit.sose.entity.MenuRole">
+    SELECT
+        <include refid="Select_Column_List">
+           <property name="tableName" value="mr"/>
+        </include>, 
+        r.`name` AS roleName,
+        m.title AS menuTitle
+    FROM
+        menu_role mr
+    INNER JOIN role r ON mr.role_id = r.id
+    AND r.is_enable = TRUE
+    INNER JOIN menu m ON mr.menu_id = m.id
+    AND m.is_enable = TRUE
+    WHERE
+        mr.state = 'A'
+    <if test="roleId != null">
+        AND mr.role_id = #{roleId,jdbcType=INTEGER}
+    </if>
+    <if test="menuId != null">
+       AND mr.menu_id = #{menuId,jdbcType=INTEGER}
+    </if>
+    ORDER BY
+        mr.role_id,
+        m.seq
+  </select>
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    SELECT
+        <include refid="Base_Column_List" />
+    FROM
+        menu_role
+    WHERE
+        id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <update id="delete" parameterType="java.lang.Integer">
+        UPDATE menu_role
+        SET state = 'X'
+        WHERE
+            id = #{id,jdbcType=INTEGER}
+    </update>
+  
+  <update id="deleteSelection" parameterType="java.util.List">
+       UPDATE menu_role
+        SET state = 'X'
+        WHERE
+            id IN
+            <foreach collection="list"  item="id"  index="index"
+              separator="," open="(" close=")">
+              #{id,jdbcType=INTEGER}
+            </foreach>
+    </update>
+    
+  <insert id="insertSelective" parameterType="org.jit.sose.entity.MenuRole" >
+    INSERT INTO menu_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        menu_id,
+        role_id
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{menuId,jdbcType=INTEGER},
+        #{roleId,jdbcType=INTEGER}
+    </trim>
+  </insert>
+  
+  <insert id="insertList" parameterType="java.util.List">
+    INSERT INTO menu_role 
+        (menu_id,role_id)
+    VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+       (
+           #{item.menu_id,jdbcType=INTEGER},
+           #{item.role_id,jdbcType=INTEGER},
+       )
+      </foreach> 
+  </insert>
+</mapper>

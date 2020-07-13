@@ -1,0 +1,21 @@
+<template>
+    <!--123456-->
+    <div class="layout" id="layout-header">
+        <layout>
+            <i-header>
+                <i-menu mode="horizontal" theme="dark" active-name="1">
+                    <div class="layout-logo-img"><img src="/layout/img/jitrjgc.png"/></div>
+                    <!--<div class="layout-logo">&nbsp;&nbsp;<span>工程教育认证</span></div>
+                    <div class="layout-logo2">&nbsp;&nbsp;<span>面向渔业应用的感知系统效能评估原型系统</span></div>-->
+                    <div class="layout-nav">
+                        <span>欢迎您</span>
+                        <!--<a id="user_name" href="javascript:void(0);">{{userName}}</a>-->
+                        <span class="nowTime">{{realTime}}</span>
+                        <span><a @click=quitLogin()>退出</a></span>
+                    </div>
+                </i-menu>
+            </i-header>
+        </layout>
+    </div>
+</template>
+<script type="text/javascript" src="/layout/js/layout-header.js"></script>

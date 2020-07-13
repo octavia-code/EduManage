@@ -1,0 +1,90 @@
+@CHARSET "UTF-8";
+
+.whole {
+	text-align: center;
+	background-color: #f5f5f6;
+	/* border: 1px solid red; */
+}
+
+.head {
+	height: 40px;
+	background-color: #f5f5f6;
+	/* border: 1px solid #787878; */
+}
+
+/*border: 1px black solid;*/
+.container {
+	text-align: center;
+	height: 580px;
+}
+
+.container-main {
+	text-align: center;
+	width: 1000px;
+	height: 480px;
+	margin: 40px auto 30px;
+	padding-top: 50px;
+	border: 1px black solid;
+	background-color: #fff;
+}
+
+/*     border: 1px red solid; */
+.div_item {
+	height: 55px;
+	text-align: center;
+}
+
+.div_left {
+	float: left;
+}
+
+.div_right {
+	float: right;
+}
+
+/* margin-top: 10px; */
+.div_input {
+	margin-left: 230px;
+	width: 440px;
+	text-align: right;
+}
+
+/*     margin-right:50px; */
+.error_font {
+	margin-right: 60px;
+	color: red;
+	font-size: 15px;
+	font-family: Microsoft YaHei;
+	width: 230px;
+	text-align: left;
+}
+
+.span_show {
+	width: 80px;
+	font-size: 17px;
+	font-family: Microsoft YaHei;
+	margin-right: 10px;
+}
+
+.long_input {
+	width: 300px;
+}
+
+.short_input {
+	width: 200px;
+}
+
+.code_button {
+	width: 100px;
+}
+
+.forget_picCode {
+	width: 100px;
+	height: 33px;
+	vertical-align: middle;
+}
+
+.forget_button {
+	width: 300px;
+}
+

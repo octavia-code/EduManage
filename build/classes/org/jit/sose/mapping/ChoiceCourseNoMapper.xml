@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ChoiceCourseNoMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ChoiceCourseNo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="year_tearm_id" property="yearTermId" jdbcType="INTEGER" />
+    <result column="staff_info_id" property="staffInfoId" jdbcType="INTEGER" />
+    <result column="course_outline_id" property="courseOutlineId" jdbcType="INTEGER" />
+    <result column="course_no" property="courseNo" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, year_term_id, staff_info_id, course_outline_id, course_no, remark, state, 
+    created_date, state_date
+  </sql>
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from choice_course_no
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <update id="delete" parameterType="java.lang.Integer" >
+    UPDATE choice_course_no
+		SET state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <insert id="insert" parameterType="org.jit.sose.entity.ChoiceCourseNo">
+    <!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+        SELECT
+		    count(*) AS count
+		FROM
+		    choice_course_no
+		WHERE
+		    state = 'A'
+		AND course_no = #{courseNo,jdbcType=VARCHAR}
+    </selectKey>
+    
+    <!-- 如果等于0即不存在 才插入 -->
+    <if test="count == 0">
+		INSERT INTO choice_course_no
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+	        year_term_id,
+	        staff_info_id,
+	        course_outline_id,
+	        course_no,
+	      <if test="remark != null" >
+	        remark,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	        #{yearTermId,jdbcType=INTEGER},
+	        #{staffInfoId,jdbcType=INTEGER},
+	        #{courseOutlineId,jdbcType=INTEGER},
+	        #{courseNo,jdbcType=VARCHAR},
+	      <if test="remark != null" >
+	        #{remark,jdbcType=VARCHAR},
+	      </if>
+	    </trim>
+	</if>
+	
+	<!-- 若已存在数据，根据唯一属性值将该数据更新（唯一属性值就不要更新了） -->
+	<if test="count > 0">
+	      UPDATE choice_course_no
+	        <set >
+		      <if test="yearTermId != null" >
+		        year_term_id = #{yearTermId,jdbcType=INTEGER},
+		      </if>
+		      <if test="staffInfoId != null" >
+		        staff_info_id = #{staffInfoId,jdbcType=INTEGER},
+		      </if>
+		      <if test="courseOutlineId != null" >
+		        course_outline_id = #{courseOutlineId,jdbcType=INTEGER},
+		      </if>
+		      <if test="remark != null" >
+		        remark = #{remark,jdbcType=VARCHAR},
+		      </if>
+		    </set>
+          WHERE
+             course_no = #{courseNo,jdbcType=VARCHAR}
+	</if>
+</insert>
+
+  <update id="update" parameterType="org.jit.sose.entity.ChoiceCourseNo" >
+    update choice_course_no
+    <set >
+      <if test="yearTermId != null" >
+        year_term_id = #{yearTermId,jdbcType=INTEGER},
+      </if>
+      <if test="staffInfoId != null" >
+        staff_info_id = #{staffInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="courseOutlineId != null" >
+        course_outline_id = #{courseOutlineId,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+ <update id="deleteSelection" parameterType="java.util.List">
+		UPDATE choice_course_no
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+</update>
+	<select id="selectChoiceCourseNoList" resultMap="BaseResultMap">
+		SELECT
+			c.id,
+			c.course_no
+		FROM
+			choice_course_no c
+		WHERE
+			c.state = 'A'
+		ORDER BY
+			c.course_no DESC
+	</select>
+	
+	<select id="selectByChoiceCourseNo" resultMap="BaseResultMap" parameterType="org.jit.sose.entity.ChoiceCourseNo">
+		SELECT
+			c.id,
+			c.course_no
+		FROM
+			choice_course_no c
+		LEFT JOIN year_term t ON c.year_term_id = t.id
+		LEFT JOIN course_outline o ON c.course_outline_id = o.id
+		LEFT JOIN staff_info s ON s.id = c.staff_info_id
+		WHERE
+			c.state = 'A'
+		AND c.year_term_id = #{yearTermId,jdbcType=INTEGER}
+		AND c.staff_info_id = #{staffInfoId,jdbcType=INTEGER}
+		AND c.course_outline_id= #{courseOutlineId,jdbcType=INTEGER}
+	</select>
+	
+	<select id="listByChoiceCourseNo" parameterType="org.jit.sose.entity.ChoiceCourseNo"
+		resultMap="BaseResultMap">
+		SELECT
+			 c.id,
+			 c.year_term_id,
+			 c.staff_info_id,
+			 c.course_outline_id,
+			 c.course_no,
+			 c.remark,
+			 c.state,
+			 c.created_date,
+			 c.state_date,
+			 t.term_name AS termName,
+			 o.outline_name AS outlineName,
+			 i.course_name AS courseName,
+			 s.staff_name AS staffName,
+			 i.course_code AS courseCode,
+			 s.staff_code AS staffCode
+			FROM
+				choice_course_no c
+			LEFT JOIN year_term t ON c.year_term_id = t.id
+			LEFT JOIN course_outline o ON c.course_outline_id = o.id
+			LEFT JOIN staff_info s ON s.id = c.staff_info_id
+			LEFT JOIN course_info i ON i.id = o.course_info_id
+			WHERE
+				c.state = 'A'
+				<if test="termName != null">
+					AND LOCATE(#{termName},term_name)
+				</if>
+				<if test="outlineName != null">
+					AND LOCATE(#{outlineName},outline_name)
+				</if>
+				<if test="staffName != null">
+					AND LOCATE(#{staffName},staff_name)
+				</if>
+				ORDER BY c.id
+	</select>
+</mapper>

@@ -1,0 +1,12 @@
+@CHARSET "UTF-8";
+/**
+ * vue/iview全局样式配置
+ */
+
+/**
+防止页面出现{{}}，使用时在div中 加入 v-cloak
+eg:<div id="register" class="body" v-cloak></div>
+ */
+[v-cloak] {
+    display: none;
+}

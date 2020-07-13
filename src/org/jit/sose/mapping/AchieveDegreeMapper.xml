@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.AchieveDegreeMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.AchieveDegree" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_code" property="userCode" jdbcType="VARCHAR" />
+    <result column="linedown" property="linedown" jdbcType="VARCHAR" />
+    <result column="lineup" property="lineup" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_code, linedown, lineup, state, create_date
+  </sql>
+  <insert id="insert" parameterType="org.jit.sose.entity.AchieveDegree" >
+    insert into achieve_degree (user_code,linedown,lineup)
+    values (#{userCode,jdbcType=VARCHAR}, #{linedown,jdbcType=VARCHAR},#{lineup,jdbcType=VARCHAR})
+  </insert>
+  <update id="update" parameterType="org.jit.sose.entity.AchieveDegree" >
+    update achieve_degree
+    <set >
+      <if test="userCode != null" >
+        user_code = #{userCode,jdbcType=VARCHAR},
+      </if>
+      <if test="linedown != null" >
+        linedown = #{linedown,jdbcType=VARCHAR},
+      </if>
+      <if test="lineup != null" >
+        lineup = #{lineup,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="delete" parameterType="java.lang.Integer" >
+    update achieve_degree
+    set 
+      state = 'X'
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="listByAchieveDegree" parameterType="org.jit.sose.entity.AchieveDegree"
+        resultMap="BaseResultMap">
+        SELECT
+			<include refid="Base_Column_List" />
+			FROM
+			achieve_degree
+			WHERE
+			state = 'A'
+			<if test="userCode!= null">
+			and LOCATE(#{userCode},user_code)
+			</if>
+			ORDER BY id
+   </select>
+   
+   <update id="updateScore" parameterType="org.jit.sose.entity.AchieveDegree" >
+   update achieve_degree set lineup=#{lineup,jdbcType=VARCHAR}+lineup where user_code='827322286'
+   </update>
+</mapper>

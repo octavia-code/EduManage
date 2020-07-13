@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.YearTermMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.YearTerm" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="term_name" property="termName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, term_name, remark, state_date, state
+  </sql>
+  <!-- 查询任务id和任务名称集合 -->
+  <select id="selectYearTermList" resultMap="BaseResultMap">
+	    SELECT
+		    y.id,
+		    y.term_name
+		FROM
+		    `year_term` y
+		WHERE
+		    y.state = 'A'
+		ORDER BY 
+			y.term_name DESC
+	  </select> 
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from year_term
+    where id = #{id,jdbcType=INTEGER}
+    </select>
+    
+  <select id="listByYearTerm" parameterType="org.jit.sose.entity.YearTerm"
+        resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            year_term
+        WHERE
+            state = 'A'
+        <if test="termName != null">
+            and LOCATE(#{termName},term_name)
+        </if>
+        ORDER BY term_name DESC
+    </select>
+ 
+ 	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE year_term
+		SET state = 'X'
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE year_term
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+	
+
+  <insert id="insert" parameterType="org.jit.sose.entity.YearTerm" keyProperty="id" useGeneratedKeys="true">
+  <!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+            SELECT
+			    count(*) AS count
+			FROM
+			    year_term
+			WHERE
+			    state = 'A'
+			AND term_name = #{termName,jdbcType=VARCHAR}
+        </selectKey>
+        
+	    <!-- 如果等于0即不存在 才插入 -->
+		<if test="count == 0">
+			insert into year_term
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				term_name,
+				<if test="remark != null">
+					remark,
+				</if>
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				#{termName,jdbcType=VARCHAR},
+				<if test="remark != null">
+					#{remark,jdbcType=VARCHAR},
+				</if>
+			</trim>
+		</if>
+		
+		<!-- 若已存在数据，将该数据更新 -->
+		<if test="count > 0">
+			update year_term
+			<set>
+				<if test="remark != null">
+					remark = #{remark,jdbcType=VARCHAR},
+				</if>
+			</set>
+			where term_name = #{termName,jdbcType=VARCHAR}
+		</if>
+  </insert>
+  
+  
+  <update id="update" parameterType="org.jit.sose.entity.YearTerm" >
+    update year_term
+    <set >
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>

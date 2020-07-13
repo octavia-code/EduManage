@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>handsontable demo</title>
+    <meta charset="utf-8">
+    <script src="./js/handsontable.full.js"></script>
+    <link rel="stylesheet" href="./css/handsontable.full.css">
+</head>
+<body>
+    <div id="example"></div>
+	<script type="text/javascript" src="./js/google1.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+package org.jit.sose.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.jit.sose.constant.JWTConstant;
+import org.jit.sose.entity.Menu;
+import org.jit.sose.entity.User;
+import org.jit.sose.entity.query.JWTQuery;
+import org.jit.sose.entity.vo.MenuVo;
+import org.jit.sose.mapper.MenuMapper;
+import org.jit.sose.mapper.UserMapper;
+import org.jit.sose.service.UserService;
+import org.jit.sose.util.AES128Util;
+import org.jit.sose.util.JWTUtil;
+import org.jit.sose.util.SessionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+	@Autowired
+	private UserMapper userMapper;
+
+	@Autowired
+	private MenuMapper menuMapper;
+
+	@Override
+	public Map<String, Object> accountLogin(String username, String password) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		// 将密码加密
+		String encryptPassword = AES128Util.encrypt(password, username);
+		// 通过用户名找到对应用户
+		User user = userMapper.selectByUserName(username);
+		if (user == null || !user.getPassword().equals(encryptPassword)) {
+			// 用户名不存在 或 密码错误
+			map.put("info", "fail");
+			return map;
+		}
+		// 不保存密码
+		user.setPassword(null);
+
+		// 获取菜单集合
+//		List<Menu> menuList = menuMapper.listMenuByUserId(user.getId());
+		List<Menu> menuList = menuMapper.selectMenuList();
+
+		// 返给客户端的菜单集合
+		List<MenuVo> menuVoList = getMenuVoList(menuList);
+
+		// 子菜单名称集合，即当前用户的权限
+		List<String> menuNameList = getMenuNameList(menuList);
+
+		// 设置用户session
+//		setUserSession(user, menuNameList);
+
+		// 创建token
+		JWTQuery query = new JWTQuery(user, "admin", menuNameList, JWTConstant.EXPIRATION);
+		String token = JWTUtil.createToken(query);
+
+		map.put("info", "success");
+		map.put("userName", user.getUserName());
+		map.put("token", token);
+		map.put("menuVoList", menuVoList);
+
+		return map;
+	}
+
+	/**
+	 * 获取返回去客户端的菜单集合
+	 * 
+	 * @param menuList 原始菜单集合
+	 * @return 菜单集合
+	 */
+	private List<MenuVo> getMenuVoList(List<Menu> menuList) {
+		// 返给客户端的菜单集合
+		List<MenuVo> menuVoList = new ArrayList<MenuVo>();
+		for (Menu parentMenu : menuList) {
+			// 将menu转为menvuVo
+			MenuVo menuVo = new MenuVo(parentMenu);
+			menuVoList.add(menuVo);
+		}
+		return menuVoList;
+	}
+
+	/**
+	 * 子菜单名称集合，即当前用户的权限
+	 * 
+	 * @param menuList 原始菜单集合
+	 * @return 子菜单名称集合
+	 */
+	private List<String> getMenuNameList(List<Menu> menuList) {
+		List<String> menuNameList = new ArrayList<String>();
+		for (Menu parentMenu : menuList) {
+			for (Menu menu : parentMenu.getMenuList()) {
+				menuNameList.add(menu.getName());
+			}
+		}
+		return menuNameList;
+	}
+
+	/**
+	 * 设置用户session
+	 * 
+	 * @param user
+	 */
+	@SuppressWarnings("unused")
+	private void setUserSession(User user, List<String> menuNameList) {
+		// 获取session
+		HttpSession session = SessionUtil.getSession();
+		// 用户信息放入拦截器，权限管理
+		session.setAttribute("USER_SESSION", user);
+		// 菜单集合放入session中
+//		session.setAttribute("MENU_LIST_SESSION", menuList);
+		// 子菜单集合名称放入session中
+		session.setAttribute("MENU_NAME_LIST_SESSION", menuNameList);
+		// 设置session最大有效时间，单位为秒
+		session.setMaxInactiveInterval(2 * 60 * 60);
+	}
+
+	@Override
+	public User selectByUserName(String userName) {
+		return userMapper.selectByUserName(userName);
+	}
+
+	@Override
+	public User selectByPhone(String phone) {
+		return userMapper.selectByPhone(phone);
+	}
+
+	@Override
+	public User selectByEmail(String email) {
+		return userMapper.selectByEmail(email);
+	}
+
+	@Override
+	public String insert(User user) {
+		if (userMapper.insert(user) > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+
+	@Override
+	public String updateById(User user) {
+		if (userMapper.updateById(user) > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+
+	@Override
+	public User selectById(Integer id) {
+		return userMapper.selectById(id);
+	}
+
+}

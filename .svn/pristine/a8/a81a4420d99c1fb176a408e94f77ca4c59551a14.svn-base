@@ -1,0 +1,42 @@
+/*弹出框 */
+@CHARSET "UTF-8";
+
+.popBody {
+	background-color: #c4e1ff;
+}
+
+/* 加载 display: inline-block;*/
+.pop_spin {
+	position: relative;
+}
+
+/* 详情页面整体居中 */
+.detailMiddle {
+	margin-left: 35%;
+	width: 30%;
+	text-align: center;
+}
+
+.tdWidth {
+	width: 60px;
+}
+
+.img {
+	width: 550px;
+	height: 320px;
+	position: relative;
+}
+
+.detailCenter {
+	width: 300px;
+	margin: auto;
+}
+/* 详情页关闭事件 */
+#btnClose {
+	position: absolute;
+	margin: 10px;
+	right: 0px;
+	bottom: 0px;
+	width: 60px;
+	border: 1px solid #aaa;
+}

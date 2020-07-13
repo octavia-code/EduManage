@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ScoreAssessmentMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ScoreAssessment" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="grade_form_id" property="gradeFormId" jdbcType="INTEGER" />
+    <result column="assessment_id" property="assessmentId" jdbcType="INTEGER" />
+    <result column="score_total_id" property="scoreTotalId" jdbcType="INTEGER" />
+    <result column="course_class_student_info_id" property="courseClassStudentInfoId" jdbcType="INTEGER" />
+    <result column="score" property="score" jdbcType="INTEGER" />
+    <result column="stu_state" property="stuState" jdbcType="CHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, grade_form_id, assessment_id, course_class_student_info_id, score, state, created_date, score_total_id,
+    state_date
+  </sql>
+  
+  <insert id="insertOrUpdateList" parameterType="java.util.List">
+    INSERT INTO score_assessment (
+        id,
+	    grade_form_id,
+	    assessment_id,
+	    course_class_student_info_id,
+	    score_total_id,
+	    score
+		)
+	VALUES
+		<foreach collection="list" item="item" separator=",">
+		  (
+		  	  #{item.id,jdbcType=INTEGER},
+		      #{item.gradeFormId,jdbcType=INTEGER},
+		      #{item.assessmentId,jdbcType=INTEGER},
+		      #{item.courseClassStudentInfoId,jdbcType=INTEGER},
+		      #{item.scoreTotalId,jdbcType=INTEGER},
+		      #{item.score,jdbcType=INTEGER}
+		  )
+	    </foreach>
+	ON DUPLICATE KEY UPDATE 
+		score = VALUES(score)
+  </insert>
+  
+  <select id="listWithStudent" parameterType="java.util.Map" resultMap="BaseResultMap">
+	    SELECT
+		    sa.id AS scoreAssessmentId,
+		    sa.score,
+		    sa.assessment_id,
+		    a.assess_name AS assessName
+		FROM
+		    score_assessment sa
+		INNER JOIN assessment a ON sa.assessment_id = a.id
+		AND a.id IN (
+		    SELECT
+		        a.id
+		    FROM
+		        assessment a
+		    WHERE
+		        a.state = 'A'
+		    AND a.course_outline_id = #{courseOutlineId,jdbcType=INTEGER}
+		    ORDER BY
+		        a.seq
+		)
+		INNER JOIN grade_form g ON sa.grade_form_id = g.id
+		AND g.id = #{gradeFormId,jdbcType=INTEGER}
+		INNER JOIN course_class_student_info ccs ON sa.course_class_student_info_id = ccs.id
+		AND ccs.id = #{courseClassStudentInfoId,jdbcType=INTEGER}
+		WHERE
+		    sa.state = 'A'
+  </select>
+  
+  <select id="selectGradeFormList" resultMap="BaseResultMap">
+    SELECT
+	    *
+	FROM
+	    score_assessment
+	WHERE
+	    state = 'A'
+	ORDER BY
+	    id
+  </select>
+  <!-- 根据学期信息标识id查询学期信息 -->
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    score_total_id,
+    stu_state
+    from score_assessment
+    where id = #{id,jdbcType=INTEGER}
+    and (state = 'A' OR state='O')
+  </select>
+  
+  <!-- 过滤查询 -->
+  <select id="listByScoreAssessment" parameterType="org.jit.sose.entity.ScoreAssessment"
+		resultMap="BaseResultMap">
+		SELECT
+			sa.id,
+			sa.assessment_id,
+			sa.course_class_student_info_id,
+			sa.score,
+			sa.state,
+			sa.created_date,
+			sa.state_date,
+			sti.student_name AS studentName,
+			sti.student_number AS studentNumber,
+			ci.class_name AS className,
+			si.school_name AS schoolName,
+			coui.course_name AS courseName,
+			coui.scord AS scord,
+			ccn.course_no AS courseNo,
+			co.outline_name AS outlineName,
+			yt.term_name AS termName,
+			stai.staff_name AS staffName,
+			ass.assess_name AS assessName,
+			ass.assess_rate AS assessRate
+		FROM
+			score_assessment sa
+			LEFT JOIN assessment ass ON ass.id = sa.assessment_id
+			LEFT JOIN course_class_student_info ccsi ON ccsi.id = sa.course_class_student_info_id
+			LEFT JOIN student_info sti ON sti.id = ccsi.student_info_id
+			LEFT JOIN course_class_info cci ON cci.id = ccsi.course_class_info_id
+			LEFT JOIN class_info ci ON ci.id = cci.class_info_id
+			LEFT JOIN course_info coui ON coui.id = cci.course_info_id
+			LEFT JOIN school_info si ON si.id = cci.school_info_id
+			LEFT JOIN staff_info stai ON stai.id = cci.staff_id
+			LEFT JOIN year_term yt ON yt.id = cci.year_term_id
+			LEFT JOIN choice_course_no ccn ON ccn.id = cci.choice_course_no_id
+			LEFT JOIN course_outline co ON co.id = ccn.course_outline_id
+		WHERE
+			1=1
+			<if test="schoolName != null">
+				AND
+					si.school_name LIKE '%${schoolName}%'
+			</if>
+			<if test="courseName != null">
+				AND
+					coui.course_name LIKE '%${courseName}%'
+			</if>	
+			<if test="courseNo != null">
+				AND
+					ccn.course_no LIKE '%${courseNo}%'
+			</if>		
+				<if test="staffName != null">
+				AND
+					stai.staff_name LIKE '%${staffName}%'
+			</if>
+			ORDER BY sa.id
+			
+	</select>
+	
+	 <!-- 逻辑删除 -->
+  <update id="delete" parameterType="java.lang.Integer" >
+   UPDATE score_assessment
+		SET state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+  </update>
+  
+   <!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE score_assessment
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+  
+ <!--  插入 -->
+  <insert id="insert" parameterType="org.jit.sose.entity.ScoreAssessment" >
+    insert into score_assessment
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="gradeFormId != null" >
+        grade_form_id,
+      </if>
+      <if test="assessmentId != null" >
+        assessment_id,
+      </if>
+      <if test="courseClassStudentInfoId != null" >
+        course_class_student_info_id,
+      </if>
+      <if test="score != null" >
+        score,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="createdDate != null" >
+        created_date,
+      </if>
+      <if test="stateDate != null" >
+        state_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="gradeFormId != null" >
+        #{gradeFormId,jdbcType=INTEGER},
+      </if>
+      <if test="assessmentId != null" >
+        #{assessmentId,jdbcType=INTEGER},
+      </if>
+      <if test="courseClassStudentInfoId != null" >
+        #{courseClassStudentInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="score != null" >
+        #{score,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null" >
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+<!--   修改 -->
+  <update id="update" parameterType="org.jit.sose.entity.ScoreAssessment" >
+    update score_assessment
+    <set >
+      <if test="gradeFormId != null" >
+        grade_form_id = #{gradeFormId,jdbcType=INTEGER},
+      </if>
+      <if test="assessmentId != null" >
+        assessment_id = #{assessmentId,jdbcType=INTEGER},
+      </if>
+      <if test="courseClassStudentInfoId != null" >
+        course_class_student_info_id = #{courseClassStudentInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="score != null" >
+        score = #{score,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateState" parameterType="org.jit.sose.entity.ScoreAssessment" >
+    UPDATE score_assessment
+    SET
+	     state = 'O',
+	     stu_state = #{stuState,jdbcType=CHAR}
+		WHERE
+		 id = #{id,jdbcType=INTEGER}	
+  </update>
+  
+  
+</mapper>

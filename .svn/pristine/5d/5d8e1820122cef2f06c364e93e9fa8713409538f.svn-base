@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>重置密码</title>
+    <script type="text/javascript" src="../public/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="../account/css/forgetPwd.css">
+</head>
+<body>
+<div class="whole" id="forgetPwd" v-cloak>
+    <div class="head"></div>
+    <div class="container">
+        <div class="container-main">
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">用&nbsp;&nbsp;户&nbsp;&nbsp;名:</span>
+                    <i-input type="text" placeholder="请输入用户名" v-model="userName"
+                             size="large" clearable class="long_input"
+                             @on-blur="checkLoginName()"/>
+                </div>
+                <div class="error_font div_right">{{loginNameFindErr}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">手机号码: </span>
+                    <i-input type="text" placeholder="请输入绑定的手机号码" v-model="phone"
+                             size="large" clearable class="long_input" @on-blur="checkPhone()"/>
+                </div>
+                <div class="error_font div_right">{{phoneErr}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">手机验证码: </span> <span> <i-input
+                        type="text" placeholder="请输入验证码" @on-blur="checkMsgCode()"
+                        v-model="msgCode" size="large" clearable class="short_input"/>
+						</span> <span> <i-button size="large" @click="checkNameByPhone()"
+                                                 :disabled="btnDisabled" class="code_button">{{btnSendCode}}</i-button>
+						</span>
+                </div>
+                <div class="error_font div_right">{{msgCodeErr}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">图形验证码: </span> <span> <i-input
+                        type="text" v-model="picCode" placeholder="请输入验证码" size="large"
+                        clearable class="short_input" @on-blur="checkImgCode()"></i-input>
+						</span> <span>
+                            <img id="forgetImg" :src="imgSrc"
+                                 onclick="refreshForget()" class="forget_picCode">
+						</span>
+                </div>
+                <div class="error_font div_right">{{picCodeErr}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">密&nbsp;&nbsp;&nbsp;&nbsp;码:</span>
+                    <i-input type="password" placeholder="请输入密码" v-model="password"
+                             size="large" clearable class="long_input"
+                             @on-blur="checkPassword()"/>
+                </div>
+                <div class="error_font div_right">{{passwordErr}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <span class="span_show">密码确认:</span>
+                    <i-input type="password" placeholder="请再次输入密码" v-model="password1"
+                             size="large" clearable="true" class="long_input"
+                             @on-blur="compare()"/>
+                </div>
+                <div class="error_font div_right">{{passwordErr1}}</div>
+            </div>
+
+            <div class="div_item">
+                <div class="div_input div_left">
+                    <i-button id="btnForget" type="info" @click="checkForget" long
+                              class="forget_button">重置密码
+                    </i-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../account/js/forgetPwd.js"></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.IndicatorRelatMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.IndicatorRelat" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="indicator_id" property="indicatorId" jdbcType="INTEGER" />
+    <result column="indicator_first_id" property="indicatorFirstId" jdbcType="INTEGER" />
+    <result column="indicator_sec_id" property="indicatorSecId" jdbcType="INTEGER" />
+    <result column="indicator_third_id" property="indicatorThirdId" jdbcType="INTEGER" />
+    <result column="seq" property="seq" jdbcType="INTEGER" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  
+  <!-- 一对多通过毕业要求指标查询一级指标 {indicatorId = indicator_id，courseInfoId = courseInfoId}-->
+  <resultMap  id="indicatorFirstResultMap" type="org.jit.sose.entity.IndicatorRelat" extends="BaseResultMap">
+      <collection property="indicatorFirstList" column="{indicatorId = indicator_id,courseInfoId = courseInfoId}" ofType="org.jit.sose.entity.IndicatorRelat" 
+            select="selectIndicatorFirstList"></collection>
+  </resultMap>
+  
+  <!-- 一对多通过毕业要求指标和一级指标查询二级指标 -->
+  <resultMap  id="indicatorSecResultMap" type="org.jit.sose.entity.IndicatorRelat" extends="BaseResultMap">
+      <collection property="indicatorSecList" column="{indicatorId = indicator_id ,indicatorFirstId = indicator_first_id ,courseInfoId = courseInfoId}" 
+      ofType="org.jit.sose.entity.IndicatorRelat" select="selectIndicatorSecList"></collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, indicator_id, indicator_first_id, indicator_sec_id, indicator_third_id, seq, 
+    state_date, state
+  </sql>
+  
+  <sql id="Select_Column_List" >
+    r.id, r.indicator_id, r.indicator_first_id, r.indicator_sec_id, r.indicator_third_id, r.seq, 
+    r.state_date, r.state
+  </sql>
+  
+  <select id="selectIndicatorList" resultMap="indicatorFirstResultMap" parameterType="org.jit.sose.entity.query.IndicatorRelatQuery">
+    SELECT
+	    g.title AS indicatorTitle,
+	    g.state AS graduationState,
+	    r.id,
+	    r.indicator_id,
+	    ci.id AS courseInfoId
+	FROM
+	    (
+		    indicator_relat r,
+		    graduation_require_indicator g,
+		    year_plan y
+	    )LEFT JOIN course_info ci ON ci.id = #{courseInfoId,jdbcType=INTEGER}
+	WHERE
+	    r.state = 'A'
+	AND g.id = r.indicator_id
+	AND y.id = g.year_plan_id
+	<if test="yearPlanId != null and yearPlanId != 0">
+		AND g.year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+	</if>
+	<if test="graduationState != null ">
+	   AND g.state = #{graduationState,jdbcType=VARCHAR}
+	</if>
+	GROUP BY
+	    r.indicator_id
+	ORDER BY
+	    y.year_name DESC
+  </select>
+  
+  <!-- 需要查出作为参数的indicator_id，作为二级指标的查询参数 -->
+  <select id="selectIndicatorFirstList" resultMap="indicatorSecResultMap" parameterType="org.jit.sose.entity.query.IndicatorRelatQuery">
+    SELECT
+        r.seq AS firstSeq,
+	    r.id,
+	    r.indicator_id,
+	    r.indicator_first_id,
+	    f.title AS firstTitle,
+	    f.content AS firstContent,
+	    g.state AS graduationState,
+        ci.id AS courseInfoId
+	FROM
+	    (
+		    indicator_relat r,
+		    indicator_first f
+		)LEFT JOIN course_info ci ON ci.id = #{courseInfoId,jdbcType=INTEGER}
+		LEFT JOIN graduation_require_indicator g ON g.id = r.indicator_id
+	WHERE
+	    r.state = 'A'
+	AND r.indicator_id = #{indicatorId,jdbcType=INTEGER}
+	AND r.indicator_first_id = f.id
+	GROUP BY
+	    r.indicator_first_id
+	ORDER BY
+        r.seq
+  </select>
+  
+  <select id="selectIndicatorSecList" resultMap="BaseResultMap" parameterType="org.jit.sose.entity.query.IndicatorRelatQuery">
+    SELECT
+        r.seq AS secSeq,
+	    r.id,
+	    r.indicator_id,
+	    r.indicator_first_id,
+	    r.indicator_sec_id,
+	    s.content AS secContent,
+	    g.state AS graduationState
+	    <if test="courseInfoId != null and courseInfoId != 0">
+		    ,c.id AS supportCoefficientId,
+	        c.`value`
+	    </if>
+	FROM
+	    indicator_relat r
+	LEFT JOIN indicator_sec s ON r.indicator_sec_id = s.id
+	LEFT JOIN graduation_require_indicator g ON g.id = r.indicator_id
+	<if test="courseInfoId != null and courseInfoId != 0">
+	   LEFT JOIN 
+	   ( support_coefficient c,course_info ci )
+	       ON r.id = c.indicator_relat_id 
+	       AND ci.id = c.course_info_id 
+	       AND c.state = 'A'
+	       AND c.course_info_id = #{courseInfoId,jdbcType=INTEGER}
+	</if>
+	WHERE
+	    r.state = 'A'
+	AND r.indicator_id = #{indicatorId,jdbcType=INTEGER}
+	AND r.indicator_first_id = #{indicatorFirstId,jdbcType=INTEGER}
+	AND r.indicator_sec_id IS NOT NULL
+	ORDER BY
+           r.seq
+  </select>
+  
+  <select id="selectNotUseIndicatorList" resultMap="org.jit.sose.mapper.GraduationRequireIndicatorMapper.BaseResultMap">
+    SELECT
+	    <include refid="org.jit.sose.mapper.GraduationRequireIndicatorMapper.SELECT_Column_List">
+	       <property name="tableName" value="g"/>
+	    </include>
+	FROM
+	    graduation_require_indicator g
+	LEFT JOIN indicator_relat r ON g.id = r.indicator_id
+	AND r.state = 'A'
+	WHERE
+	    g.state != 'x'
+	AND r.indicator_id IS NULL
+  </select>
+  
+  <select id="selectNotUseIndicatorFirstList" resultMap="org.jit.sose.mapper.IndicatorFirstMapper.BaseResultMap" parameterType="java.lang.Integer">
+	SELECT
+	    <include refid="org.jit.sose.mapper.IndicatorFirstMapper.SELECT_Column_List">
+           <property name="tableName" value="f"/>
+        </include>
+	FROM
+	    (
+	        indicator_first f,
+	        graduation_require_indicator i
+	    )
+	LEFT JOIN indicator_relat r ON f.id = r.indicator_first_id
+	AND i.id = r.indicator_id
+	AND r.state = 'A'
+	WHERE
+	    f.state = 'A'
+	AND i.id = #{indicatorId,jdbcType=INTEGER}
+	AND f.year_plan_id = i.year_plan_id
+	AND r.indicator_first_id IS NULL
+  </select>
+  
+  <select id="selectNotUseIndicatorSecList" resultMap="org.jit.sose.mapper.IndicatorSecMapper.BaseResultMap">
+	SELECT
+	    <include refid="org.jit.sose.mapper.IndicatorSecMapper.SELECT_Column_List">
+           <property name="tableName" value="s"/>
+        </include>
+	FROM
+	    (
+	        indicator_sec s,
+	        indicator_first f,
+	        graduation_require_indicator i
+	    )
+	LEFT JOIN indicator_relat r ON s.id = r.indicator_sec_id
+	AND r.indicator_id = i.id
+	AND r.indicator_first_id = f.id
+	AND r.state = 'A'
+	WHERE
+	    s.state = 'A'
+	AND i.id = #{indicatorId,jdbcType=INTEGER}
+	AND f.id = #{indicatorFirstId,jdbcType=INTEGER}
+	AND s.indicator_first_id = f.id
+	AND s.year_plan_id = i.year_plan_id
+	AND r.indicator_sec_id IS NULL
+  </select>
+  
+  <select id="listByCourseInfo" parameterType="org.jit.sose.entity.IndicatorRelat"
+        resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            indicator_relat
+        WHERE
+            state = 'A'
+    </select>
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from indicator_relat
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <!-- 必须现有上一层才能进下一层 -->
+  <update id="delete" parameterType="org.jit.sose.entity.IndicatorRelat" >
+        UPDATE indicator_relat
+        SET state = 'X'
+        <where>
+          <if test="indicatorId != null" >
+	        indicator_id = #{indicatorId,jdbcType=INTEGER}
+		        <if test="indicatorFirstId != null" >
+	              AND indicator_first_id = #{indicatorFirstId,jdbcType=INTEGER}
+		            <if test="indicatorSecId != null" >
+		            AND indicator_sec_id = #{indicatorSecId,jdbcType=INTEGER}
+		            </if>
+	            </if>
+	      </if>
+	      AND state = 'A'
+	     </where>
+    </update>
+    
+  <insert id="insert" parameterType="org.jit.sose.entity.IndicatorRelat" >
+    insert into indicator_relat
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="indicatorId != null" >
+        indicator_id,
+      </if>
+      <if test="indicatorFirstId != null" >
+        indicator_first_id,
+      </if>
+      <if test="indicatorSecId != null" >
+        indicator_sec_id,
+      </if>
+      <if test="indicatorThirdId != null" >
+        indicator_third_id,
+      </if>
+      <if test="seq != null" >
+        seq,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="indicatorId != null" >
+        #{indicatorId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorFirstId != null" >
+        #{indicatorFirstId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorSecId != null" >
+        #{indicatorSecId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorThirdId != null" >
+        #{indicatorThirdId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        #{seq,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.IndicatorRelat" >
+    update indicator_relat
+    <set >
+      <if test="indicatorId != null" >
+        indicator_id = #{indicatorId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorFirstId != null" >
+        indicator_first_id = #{indicatorFirstId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorSecId != null" >
+        indicator_sec_id = #{indicatorSecId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorThirdId != null" >
+        indicator_third_id = #{indicatorThirdId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        seq = #{seq,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  
+</mapper>

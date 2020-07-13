@@ -1,0 +1,346 @@
+var vCourseClassStudentInfo = new Vue({
+    el: '#courseClassStudentInfo',
+    data: function () {
+        return {
+        	firstPath: '/CourseClassStudentInfo',// 请求一级路径
+            nowData: [], column: [], loading: true, selection: [],// 表格参数
+            totalNum: 0, pageNum: 1, pageSize:10,  // 分页参数
+            loadingMsg: '',// 加载提示
+            notice: '',// 提醒对象
+            courseClassStudentInfo: {
+                id: '', courseClassInfoId: '', studentInfoId: '',seq:''
+            },// 实体类
+            sCourseClassStudentInfo: {
+            	courseClassInfoId: '', studentInfoId: ''		
+            },// 搜索信息
+            courseClassStudentInfoTemp: '',// 修改临时存放信息
+            addCourseClassStudentInfoModal: false,// 新增课程班级学生信息模态框
+            editCourseClassStudentInfoModal: false,// 编辑课程班级学生信息模态框
+            removeCourseClassStudentInfoModal: false,// 删除课程班级学生信息模态框
+
+        }
+    },
+    components: {
+        'layout-header': httpVueLoader('/layout/layout-header.vue'),
+        'layout-sider': httpVueLoader('/layout/layout-sider.vue'),
+        'layout-footer': httpVueLoader('/layout/layout-footer.vue')
+    },
+    mounted() {
+        
+        
+        this.initPage();
+        this.filter();
+    },
+    methods: {
+        /**
+		 * 页面初始化加载项 表格表头
+		 */
+        initPage() {
+            let data = {tableName: "course_class_student_info"};
+            let url ='/tableTitle/listByTableName';
+            callAjaxPost(url, data, this.getTableHeadSuc);
+        },
+        /**
+		 * 获取表头回调函数
+		 * 
+		 * @param data
+		 *            请求返回参数
+		 */
+        getTableHeadSuc(data) {
+            // 生成表头
+            this.column = showCol(data.obj.key, data.obj.title);
+
+            // 添加自定义slot-scope
+            this.column.push(headActionSlot());       
+            // 添加多选
+            this.column.unshift(headSelection());          
+        },
+
+        /**
+		 * 表格过滤查询
+		 */
+        filter() {
+        	if (checkLength(this.sCourseClassStudentInfo.courseClassInfoId, '5', '课程班级标识不能超过5位数') ||
+                    checkLength(this.sCourseClassStudentInfo.studentInfoId, '5', '课程班级学生名称不能超过5位数')) {
+                    return;
+                }
+            console.log('当前页：' + this.pageNum);
+            console.log('页面大小：' + this.pageSize);
+            let data = {
+                pageNum: this.pageNum,
+                pageSize: this.pageSize,
+                courseClassInfoId: this.sCourseClassStudentInfo.courseClassInfoId,
+                studentInfoId:this.sCourseClassStudentInfo.studentInfoId,
+            };
+            let url =this.firstPath + '/filter';
+            callAjaxPost(url, data, this.filterSuc);
+            // 显示加载
+            this.loading = true;
+        },
+        /**
+		 * 表格过滤查询回调函数
+		 * 
+		 * @param data
+		 *            请求返回参数
+		 */
+        filterSuc(data) {
+            // 取消显示加载
+        	 this.loading = false;
+             this.nowData = data.obj.list;
+             this.totalNum = data.obj.total;
+             // 再次设置当前页码,若查询记录为空，设为第一页
+             this.pageNum = data.obj.pageNum === 0 ? 1 : data.obj.pageNum;
+         },
+
+        /**
+		 * 清除搜索条件
+		 */
+        clearSCourseClassStudentInfo() {
+            this.sCourseClassStudentInfo.studentInfoId = '';
+            this.sCourseClassStudentInfo.courseClassInfoId = '';
+        },
+
+        /**
+		 * 改变页码
+		 * 
+		 * @param pageNum
+		 *            改变后的页码
+		 */
+        onPageChange(pageNum) {
+            this.pageNum = pageNum;
+            this.filter();
+        },
+        /**
+		 * 切换每页条数
+		 * 
+		 * @param pageSize
+		 *            换后的每页条数
+		 */
+        onPageSizeChange(pageSize) {
+            this.pageSize = pageSize;
+            this.filter();
+        },
+
+        /**
+		 * 新增课程班级学生信息
+		 */
+        addCourseClassStudentInfo(){
+        	 // 检查数据格式
+            if (checkEmpty(this.courseClassStudentInfo.courseClassInfoId, '课程班级标识不能为空') ||
+                checkLength(this.courseClassStudentInfo.courseClassInfoId, '5', '课程班级标识不能超过5位数') ||
+                checkEmpty(this.courseClassStudentInfo.studentInfoId, '学生标识不能为空') ||
+                checkLength(this.courseClassStudentInfo.studentInfoId, '5', '学生标识不能超过5位数')) {
+                return;
+            }
+            // 发送请求
+            let data = {
+            		courseClassInfoId: this.courseClassStudentInfo.courseClassInfoId,
+            		studentInfoId: this.courseClassStudentInfo.studentInfoId,
+                    seq: this.courseClassStudentInfo.seq,
+            };
+            let url = this.firstPath + '/insert';
+            callAjaxPost(url, data, this.addCourseClassStudentInfoSuc);
+            // 打开加载提示
+            this.loadingMsg = messageLoading();
+        	
+        }, 
+               
+        /**
+		 * 新增课程班级学生信息回调函数
+		 * 
+		 * @param data
+		 *            请求返回参数
+		 */
+        addCourseClassStudentInfoSuc(data) {
+            // 关闭加载提示
+            closeMessageLoading(this.loadingMsg);
+            switch (data.code) {
+            case 200:
+                // 关闭模态框
+                this.addCourseClassStudentInfoModal = false;
+                messageSuccess( "新增课程班级学生信息成功");
+                // 重新查询数据
+                this.filter();
+                // 清除课程班级学生信息
+                this.clearCourseClassStudentInfo();
+                break;
+            case 420:
+                messageError(this, data.msg);
+                break;
+            default:
+                break;
+        }
+    },
+        /**
+		 * 取消新增课程班级学生
+		 */
+        cancelAddCourseClassStudentInfo() {
+            // 关闭模态框
+            this.addCourseClassStudentInfoModal = false;
+            // 清除课程班级学生信息
+            this.clearCourseClassStudentInfo();
+        },
+
+        /**
+		 * 打开编辑课程班级学生信息模态框
+		 * 
+		 * @param index
+		 *            当前数据索引
+		 */
+        openEditCourseClassStudentInfoModal(index) {
+            console.log(this.nowData[index]);
+            this.courseClassStudentInfo.id = this.nowData[index].id;
+            this.courseClassStudentInfo.courseClassInfoId = this.nowData[index].courseClassInfoId;
+            this.courseClassStudentInfo.studentInfoId = this.nowData[index].studentInfoId;
+            this.courseClassStudentInfo.seq = this.nowData[index].seq;
+
+           
+
+            // 打开模态框
+            this.editCourseClassStudentInfoModal = true;
+        },
+        /**
+		 * 修改课程班级学生信息
+		 */
+        editCourseClassStudentInfo() {
+
+        	 if (checkEmpty(this.courseClassStudentInfo.courseClassInfoId, '课程班级标识不能为空') ||
+                     checkLength(this.courseClassStudentInfo.courseClassInfoId, '5', '课程班级标识不能超过5位数') ||
+                     checkEmpty(this.courseClassStudentInfo.studentInfoId, '学生标识不能为空') ||
+                     checkLength(this.courseClassStudentInfo.studentInfoId, '5', '学生标识不能超过5位数')) {
+                     return;
+                 }
+
+        	let data ={
+        			courseClassInfoId: this.courseClassStudentInfo.courseClassInfoId,
+            		studentInfoId: this.courseClassStudentInfo.studentInfoId,
+                    seq: this.courseClassStudentInfo.seq,
+                     
+        	}
+        	console.log(data)
+             let url = this.firstPath + '/update';
+             callAjaxPost(url, data, this.editCourseClassStudentInfoSuc);
+             // 打开加载提示
+             this.loadingMsg = messageLoading();
+        },
+        editCourseClassStudentInfoSuc(data) {
+            // 关闭加载提示
+            closeMessageLoading(this.loadingMsg);
+            switch (data.code) {
+            case 200:
+                // 关闭模态框
+                this.editCourseClassStudentInfoModal = false;
+                messageSuccess( "课程班级学生信息修改成功");
+                // 重新查询数据
+                this.filter();
+                // 清除课程班级学生信息
+                this.clearCourseClassStudentInfo();
+                break;
+            case 420:
+                messageError(this, data.msg);
+                break;
+            default:
+                break;
+        }
+    },
+        /**
+		 * 取消修改课程班级学生信息
+		 */
+        cancelEditCourseClassStudentInfo() {
+            // 关闭模态框
+            this.editCourseClassStudentInfoModal = false;
+            // 清除课程班级学生信息
+            this.clearCourseClassStudentInfo();
+        },
+        /**
+		 * 清除课程班级学生信息
+		 */
+        clearCourseClassStudentInfo() {
+        	this.courseClassStudentInfo.id = '';
+        	this.courseClassStudentInfo.courseClassInfoId = '';
+        	this.courseClassStudentInfo.studentInfoId = '';
+        	this.courseClassStudentInfo.seq = '';
+        
+        },
+
+        /**
+		 * 在多选模式下有效，只要选中项发生变化时就会触发
+		 * 
+		 * @param selection
+		 *            已选项数据
+		 */
+        onSelectionChange(selection) {
+            this.selection = selection;
+            console.log(this.selection);
+        },
+
+        /**
+		 * 打开删除课程班级学生信息模态框
+		 */
+        openRemoveCourseClassStudentInfoModal() {
+            // 判断当前多选是否勾选
+            if (this.selection.length === 0) {
+                messageWarning(this, '请先勾选数据，再批量删除');
+                return;
+            }
+            // 打开模态框
+            this.removeCourseClassStudentInfoModal = true;
+        },
+
+        /**
+		 * 批量删除数据
+		 */
+        removeCourseClassStudentInfoSelect() {
+            // 关闭模态框
+            this.removeCourseClassStudentInfoModal = false;
+            var idList = [];
+            for (var i = 0; i < this.selection.length; i++) {
+                idList[i] = this.selection[i].id;
+            }
+            console.log(idList);
+            var data = idList;
+            var url =  this.firstPath + '/deleteSelection';
+            callAjaxPost(url, data, this.removeCourseClassStudentInfoSelectSuc);
+            // 打开加载提示
+            this.loadingMsg = messageLoading();
+        },
+
+        /**
+		 * 批量删除数据成功回调函数
+		 */
+        removeCourseClassStudentInfoSelectSuc(data) {
+            // 关闭加载提示
+            closeMessageLoading(this.loadingMsg);
+            messageSuccess( '成功删除 ' + data.obj + ' 个课程班级学生信息!');
+            // 清除多选列表
+            this.selection = [];
+            // 加载表格数据
+            this.filter();
+        },
+
+        /**
+		 * 删除课程班级学生信息
+		 * 
+		 * @param index
+		 */
+        removeCourseClassStudentInfo(index) {
+            let data = this.nowData[index].id; 
+            let url =this.firstPath + '/delete';
+            callAjaxPost(url, data, this.removeCourseClassStudentInfoSuc);
+
+            // 打开加载提示
+            this.loadingMsg = messageLoading();
+        },
+
+        removeCourseClassStudentInfoSuc(data) {
+            // 关闭加载提示
+            closeMessageLoading(this.loadingMsg);
+            messageSuccess( '课程班级学生信息删除成功！ ');
+            // 重新查询数据
+            this.filter();
+        },
+
+
+    }
+    
+});

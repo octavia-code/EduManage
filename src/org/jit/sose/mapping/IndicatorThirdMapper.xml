@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.IndicatorThirdMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.IndicatorThird">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, content, seq, user_id, create_date, state_date, state
+	</sql>
+	
+	<select id="selectIndicatorThirdList" resultMap="BaseResultMap">
+        SELECT
+		    i.id,
+		    i.content,
+		    i.seq
+		FROM
+		    indicator_third i
+		WHERE
+		    i.state = 'A'
+		ORDER BY
+		    i.seq
+    </select>
+    
+    <select id= "countByIndicatorThird" resultType="java.lang.Integer"
+		parameterType="org.jit.sose.entity.IndicatorThird">
+		SELECT
+	    	COUNT(*)
+	    FROM
+	    	indicator_third
+	    WHERE
+	    	state = 'A'
+	    AND seq = #{seq,jdbcType=INTEGER}
+	    <if test="id != null">
+		AND id != #{id,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="listByIndicatorThird" parameterType="org.jit.sose.entity.IndicatorThird"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		indicator_third
+		WHERE
+		state = 'A'
+		<if test="content != null">
+			and LOCATE(#{content},content)
+		</if>
+		ORDER BY content
+	</select>
+
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from indicator_third
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE indicator_third
+		SET
+		state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE indicator_third
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	<insert id="insert" parameterType="org.jit.sose.entity.IndicatorThird">
+		insert into indicator_third
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			content,
+			<if test="seq != null">
+				seq,
+			</if>
+			user_id,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{content,jdbcType=VARCHAR},
+			<if test="seq != null">
+				#{seq,jdbcType=INTEGER},
+			</if>
+			#{userId,jdbcType=INTEGER},
+
+		</trim>
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.IndicatorThird">
+		update indicator_third
+		<set>
+			state ='O'
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+
+
+
+</mapper>

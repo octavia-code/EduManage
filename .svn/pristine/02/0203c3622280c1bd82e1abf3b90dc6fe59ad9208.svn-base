@@ -1,0 +1,6 @@
+# 全局变量
+LOG_PATH = D://log//
+smsSign = jistsose
+GLOBAL_NAME = dylan
+
+test = 分支测试2

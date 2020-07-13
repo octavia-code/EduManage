@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.GraduationRequireIndicatorMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.GraduationRequireIndicator" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="year_plan_id" property="yearPlanId" jdbcType="INTEGER" />
+    <result column="specialty_id" property="specialtyId" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, title, year_plan_id, specialty_id, remark, user_id, create_date, state_date, state
+  </sql>
+  
+  <sql id="SELECT_Column_List" >
+     ${tableName}.id,  ${tableName}.title,  ${tableName}.year_plan_id,  ${tableName}.specialty_id,  ${tableName}.remark,  ${tableName}.user_id,  ${tableName}.state
+  </sql>
+  
+  <select id="selectGraduationList" resultMap="BaseResultMap">
+       SELECT
+		    g.id,
+		    g.title
+		FROM
+		    graduation_require_indicator g
+		WHERE
+		    g.state = 'A'
+    </select>
+  
+  <select id="listByGraduationRequireIndicator" parameterType="org.jit.sose.entity.GraduationRequireIndicator"
+        resultMap="BaseResultMap">
+        SELECT
+		    g.id,
+		    g.title,
+		    g.year_plan_id,
+		    g.specialty_id,
+		    g.user_id,
+		    g.remark,
+		    y.year_name AS yearName,
+		    s.subject_name AS subjectName
+		FROM
+		    `graduation_require_indicator` g
+		LEFT JOIN year_plan y ON y.id = g.year_plan_id
+		LEFT JOIN specialty s ON s.id = g.specialty_id
+		WHERE
+		    1 = 1
+		AND g.state = 'A'
+		AND y.state = 'A'
+		AND s.state = 'A'
+		<if test="title != null">
+            AND LOCATE(#{title,jdbcType=VARCHAR},g.title)
+        </if>
+        <if test="yearPlanId != null">
+            AND g.year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+        </if>
+        <if test="specialtyId != null">
+            AND g.specialty_id = #{specialtyId,jdbcType=INTEGER}
+        </if>
+        ORDER BY
+		    year_name DESC,
+		    subject_name
+    </select>
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    SELECT
+	    <include refid="Base_Column_List" />
+	FROM
+	    graduation_require_indicator
+	WHERE
+	    id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <update id="delete" parameterType="java.lang.Integer">
+        UPDATE graduation_require_indicator
+        SET state = 'X'
+        WHERE
+            id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    
+    <update id="admit" parameterType="java.lang.Integer">
+        UPDATE graduation_require_indicator
+        SET state = 'A'
+        WHERE
+            id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <update id="deleteSelection" parameterType="java.util.List">
+       UPDATE graduation_require_indicator
+        SET state = 'X'
+        WHERE
+            id IN
+            <!--每次从list集合中取出数据放入id中 -->
+            <foreach collection="list"  item="id"  index="index"
+              separator="," open="(" close=")">
+              #{id,jdbcType=INTEGER}
+            </foreach>
+    </update>
+  
+  
+  <insert id="insert" parameterType="org.jit.sose.entity.GraduationRequireIndicator" >
+    INSERT INTO graduation_require_indicator
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        title,
+        year_plan_id,
+        specialty_id,
+      <if test="remark != null" >
+        remark,
+      </if>
+        user_id,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{title,jdbcType=VARCHAR},
+        #{yearPlanId,jdbcType=INTEGER},
+        #{specialtyId,jdbcType=INTEGER},
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+        #{userId,jdbcType=INTEGER},
+    </trim>
+  </insert>
+  <update id="update" parameterType="org.jit.sose.entity.GraduationRequireIndicator" >
+    update graduation_require_indicator
+    <set >
+        state = 'O'
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

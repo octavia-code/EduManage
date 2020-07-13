@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ExcelModalContentMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.ExcelModalContent" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="excel_id" property="excelId" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="row_id" property="rowId" jdbcType="INTEGER" />
+    <result column="col_id" property="colId" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, excel_id, content, row_id, col_id, created_date, state_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from excel_modal_content
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from excel_modal_content
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.jit.sose.entity.ExcelModalContent" >
+    insert into excel_modal_content (id, excel_id, content, 
+      row_id, col_id, created_date, 
+      state_date)
+    values (#{id,jdbcType=INTEGER}, #{excelId,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR}, 
+      #{rowId,jdbcType=INTEGER}, #{colId,jdbcType=INTEGER}, #{createdDate,jdbcType=TIMESTAMP}, 
+      #{stateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="org.jit.sose.entity.ExcelModalContent" >
+    insert into excel_modal_content
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="excelId != null" >
+        excel_id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="rowId != null" >
+        row_id,
+      </if>
+      <if test="colId != null" >
+        col_id,
+      </if>
+      <if test="createdDate != null" >
+        created_date,
+      </if>
+      <if test="stateDate != null" >
+        state_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="excelId != null" >
+        #{excelId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="rowId != null" >
+        #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null" >
+        #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="createdDate != null" >
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.ExcelModalContent" >
+    update excel_modal_content
+    <set >
+      <if test="excelId != null" >
+        excel_id = #{excelId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="rowId != null" >
+        row_id = #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null" >
+        col_id = #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.jit.sose.entity.ExcelModalContent" >
+    update excel_modal_content
+    set excel_id = #{excelId,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR},
+      row_id = #{rowId,jdbcType=INTEGER},
+      col_id = #{colId,jdbcType=INTEGER},
+      created_date = #{createdDate,jdbcType=TIMESTAMP},
+      state_date = #{stateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

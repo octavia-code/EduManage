@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>视频学习</title>
+<script type="text/javascript" src="../public/common.js"></script>
+</head>
+<body>
+	<div class="layout-body" id="videoManage" v-cloak>
+		<layout-header></layout-header>
+		<div id="wrap">
+			<layout-sider></layout-sider>
+			<div class="layout-main">
+				<div class="qry">
+					<div class="first">
+						<span class="juinline"> 视频名称: <el-input
+								class="select_input" type="text" v-model="sFileInfo.fileName"
+								size="medium"></el-input>
+						</span>
+					</div>
+					<div class="butRight">
+						<i-button type="primary" icon="ios-search" @click="filter">搜索</i-button>
+						&nbsp;&nbsp;
+						<i-button style="float: right" type="primary" size="medium"
+							shape="circle" @click="videoUploadModal = true">视频上传</i-button>
+					</div>
+				</div>
+				<!-- 文件上传模态框 -->
+				<Modal v-model="videoUploadModal" title="请上传视频"
+					:mask-closable="false" @on-ok="submitTextList">
+				<div>
+					<center>
+							                    <el-upload class="upload-text"  accept=".mp4" :limit="1" :on-change="handleChangeText"
+							                               :file-list="textFileList" :auto-upload="false"> <i-button
+							                            icon="ios-cloud-upload-outline" class="input">选取文件</i-button>
+							                        <div slot="tip" class="el-upload__tip">仅能上传单个mp4格式视频文件，且文件大小不超过500MB);</div>
+							                    </el-upload>
+					</center>
+				</div>
+				</Modal>
+
+				<div class="white">&nbsp;</div>
+				<div>
+					<!-- 表格 -->
+					<i-table class="table" border height="auto" width="auto"
+						size='small' :columns="column" :data="nowData" :loading="loading">
+					<template slot-scope="{ row, index }" slot="action"> <a
+						class="table-a" @click="openVideoPlayModal(index)">视频播放</a> 
+						<a @click="openStemTestModal(index)">章节测试</a> </template> </i-table>
+
+					<div class="div-inline-right">
+<!-- 						current:当前页码 total:数据总数 page-size:每页条数 -->
+						<Page :current="pageNum" :total="totalNum" :page-size="pageSize"
+							@on-change="onPageChange" @on-page-size-change="onPageSizeChange"
+							show-total show-elevator show-sizer></Page>
+					</div>
+				</div>
+				
+				<!-- 视频播放模态框 -->
+				<Modal v-model="videoPlayModal" title="视频播放窗口" width="500px"  closable>
+				<div align="center"><video id="playVideo" controls ></video></div>
+				</Modal>
+				
+				<!-- 章节测试模态框 -->
+				<Modal v-model="stemTestModal" title="章节测试" width="1000px" @on-ok="submitAnswer" closable scrollable>
+				<div v-for="(item,index) in questionFiveList"><span>{{item.stem}}</span>
+				<Radio-Group v-model="answerList[index]"><Radio label="A">正确</Radio><Radio label="B" >错误</Radio></Radio-Group>
+				</div>
+				
+				
+				</Modal>
+			</div>
+			<layout-footer></layout-footer>
+		</div>
+		<script type="text/javascript" src="./js/videoManage.js"></script>
+</body>
+</html>

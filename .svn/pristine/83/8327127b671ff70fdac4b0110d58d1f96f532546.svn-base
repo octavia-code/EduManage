@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>工程教育认证-注册界面</title>
+    <script type="text/javascript" src="../public/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="../account/css/register.css">
+</head>
+<body>
+<div class="whole">
+    <div class="head"></div>
+    <div id="register" class="body" v-cloak>
+        <div class="content">
+            <div class="content-head">欢迎注册</div>
+            <div class="tips">
+                <span class="tips-text">已有账号？</span>
+                <a class="tips-link" href="/">快捷登录 ></a>
+            </div>
+            <div class="content-body">
+
+
+                <div class="div_item">
+                    <div class="div_input div_left">
+                        <span class="span_show">用&nbsp;&nbsp;户&nbsp;&nbsp;名:</span>
+                        <i-input type="text" placeholder="请输入用户名" v-model="userName" size="large" clearable
+                                 class="long_input" @on-blur="findLoginName()"/>
+                    </div>
+                    <div class="error_font div_right">{{loginNameFindErr}}</div>
+                </div>
+
+                <div class="div_item">
+                    <div class="div_input_left div_left">
+                        <span class="span_show">绑定类型:</span>
+                        <radio-group v-model="type" size="large" class="long_input">
+                            <radio label="phone" class="span_radio">绑定手机</radio>
+                            <radio label="email">绑定邮箱</radio>
+                        </radio-group>
+                    </div>
+                    <div class="error_font div_right">{{typeErr}}</div>
+                </div>
+
+                <!--手机绑定-->
+                <div class="div_item" v-show="bindShow">
+                    <div class="div_input div_left">
+                        <span class="span_show">手机号码: </span>
+                        <i-input type="text" placeholder="请输入手机号码" v-model="phone" size="large" clearable
+                                 class="long_input" @on-blur="checkPhone()"/>
+                    </div>
+                    <div class="error_font div_right">{{phoneErr}}</div>
+                </div>
+                <div class="div_item" v-show="bindShow">
+                    <div class="div_input div_left">
+                        <span class="span_show">短信验证: </span>
+                        <span>
+                            <i-input type="text" placeholder="请输入短信验证码"
+                                     @on-blur="checkMsgCode()" v-model="msgCode" size="large"
+                                     clearable class="short_input"/>
+                        </span>
+                        <span>
+                            <i-button size="large" @click="findByPhone()" :disabled="btnDisabled"
+                                      class="code_button">{{btnSendCode}}</i-button>
+                        </span>
+                    </div>
+                    <div class="error_font div_right">{{msgCodeErr}}</div>
+                </div>
+
+                <!--绑定邮箱-->
+                <div class="div_item" v-show="!bindShow">
+                    <div class="div_input div_left">
+                        <span class="span_show">邮箱地址: </span>
+                        <i-input type="text" placeholder="请输入邮箱号码" v-model="email" size="large" clearable
+                                 class="long_input" @on-blur="checkEmail()"/>
+                    </div>
+                    <div class="error_font div_right">{{emailErr}}</div>
+                </div>
+                <div class="div_item" v-show="!bindShow">
+                    <div class="div_input div_left">
+                        <span class="span_show">邮箱验证: </span>
+                        <span>
+                            <i-input type="text" placeholder="请输入邮箱验证码"
+                                     @on-blur="checkEmailCode()" v-model="emailCode" size="large"
+                                     clearable class="short_input"/>
+                        </span>
+                        <span>
+                            <i-button size="large" @click="findByEmail()" :disabled="btnDisabled"
+                                      class="code_button">{{btnSendCode}}</i-button>
+                        </span>
+                    </div>
+                    <div class="error_font div_right">{{emailCodeErr}}</div>
+                </div>
+
+                <div class="div_item">
+                    <div class="div_input div_left">
+                        <span class="span_show">图形验证: </span>
+                        <span>
+                            <i-input type="text" v-model="picCode"
+                                     placeholder="请输入验证码" size="large" clearable class="short_input"
+                                     @on-blur="checkImgCode()"></i-input>
+                        </span>
+                        <span>
+                            <img id="registerImg" :src="imgSrc"
+                                 onclick="refreshRegister()" class="register_picCode">
+                        </span>
+                    </div>
+                    <div class="error_font div_right">{{picCodeErr}}</div>
+                </div>
+
+                <div class="div_item">
+                    <div class="div_input div_left">
+                        <span class="span_show">登陆密码:</span>
+                        <i-input type="password" placeholder="请输入密码" v-model="password" size="large" clearable
+                                 class="long_input" @on-blur="checkPassword()"/>
+                    </div>
+                    <!--<p class="passwordTip">{{passwordTip}}</p>-->
+                    <div class="error_font div_right">{{passwordErr}}</div>
+                </div>
+
+                <div class="div_item">
+                    <div class="div_input div_left">
+                        <span class="span_show">密码确认:</span>
+                        <i-input type="password" placeholder="请再次输入密码" v-model="password1" size="large" clearable="true"
+                                 class="long_input" @on-blur="compare()"/>
+                    </div>
+                    <div class="error_font div_right">{{passwordErr1}}</div>
+                </div>
+
+                <div class="div_item">
+                    <div class="div_input div_left">
+                        <i-button id="btnRegister" type="info" @click="checkRegister" long class="register_button">注册
+                        </i-button>
+                    </div>
+                </div>
+                <div class="div_item_bottom"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="foot"></div>
+<script src="../account/js/register.js"></script>
+</body>
+</html>

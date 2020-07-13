@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.TableTitleMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.TableTitle" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="table_name" property="tableName" jdbcType="VARCHAR" />
+    <result column="table_key" property="tableKey" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="seq" property="seq" jdbcType="INTEGER" />
+    <result column="is_enable" property="enable" jdbcType="BIT" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, table_name, table_key, title, seq, is_enable
+  </sql>
+  
+  <select id = "listByTableName" resultMap="BaseResultMap" parameterType="java.lang.String">
+  	SELECT
+		table_key, title
+	FROM
+		table_title
+	WHERE
+		is_enable = TRUE
+	AND table_name = #{tableName,jdbcType=VARCHAR}
+	ORDER BY seq
+  </select>
+  
+	<select id="selectTableTitleList" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"></include>
+		FROM
+		`table_title`
+		WHERE
+		is_enable = TRUE
+		ORDER BY seq
+	</select>
+
+	<insert id="insert" parameterType="org.jit.sose.entity.TableTitle">
+	
+	<!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+            SELECT
+			    count(*) AS count
+			FROM
+			    table_title
+			WHERE
+			    table_name = #{tableName,jdbcType=VARCHAR}
+				AND table_key = #{tableKey,jdbcType=VARCHAR}
+        </selectKey>
+        
+	    <!-- 如果等于0即不存在 才插入 -->
+        <if test="count == 0">
+			insert into table_title
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="tableName != null">
+					table_name,
+				</if>
+				<if test="title != null">
+					title,
+				</if>
+				<if test="tableKey != null">
+					table_key,
+				</if>
+				<if test="seq != null">
+					seq,
+				</if>
+				is_enable,
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				<if test="tableName != null">
+					#{tableName,jdbcType=VARCHAR},
+				</if>
+				<if test="title != null">
+					#{title,jdbcType=VARCHAR},
+				</if>
+				<if test="tableKey != null">
+					#{tableKey,jdbcType=VARCHAR},
+				</if>
+				<if test="seq != null">
+					#{seq,jdbcType=INTEGER},
+				</if>
+				#{enable,jdbcType=INTEGER},
+			</trim>
+		</if>
+		
+		<!-- 若已存在数据，将该数据更新 -->
+		<if test="count > 0">
+		    update table_title
+			<set>
+				<if test="title != null">
+					title = #{title,jdbcType=VARCHAR},
+				</if>
+				<if test="seq != null">
+					seq = #{seq,jdbcType=INTEGER},
+				</if>
+					is_enable = #{enable,jdbcType=INTEGER},
+			</set>
+	          WHERE
+			    table_name = #{tableName,jdbcType=VARCHAR}
+				AND table_key = #{tableKey,jdbcType=VARCHAR}
+		</if>
+	
+		
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.TableTitle">
+		update table_title
+		<set>
+			<if test="tableName != null">
+				table_name = #{tableName,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="tableKey != null">
+				table_key = #{tableKey,jdbcType=VARCHAR},
+			</if>
+			<if test="seq != null">
+				seq = #{seq,jdbcType=INTEGER},
+			</if>
+				is_enable = #{enable,jdbcType=INTEGER},
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectById" parameterType="org.jit.sose.entity.TableTitle"
+		resultMap="BaseResultMap">
+		SELECT
+			t.id,
+			t.`table_name`,
+			t.title,
+			t.table_key,
+			t.seq,
+			t.is_enable
+		FROM
+			table_title t
+		WHERE
+			1 = 1
+			<if test="tableName!= null">
+				and LOCATE(#{tableName},t.table_name)
+			</if>
+		ORDER BY t.table_name,t.seq
+	</select>
+
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE table_title
+		SET is_enable = FALSE
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index"
+			separator="," open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE table_title
+		SET is_enable = FALSE
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

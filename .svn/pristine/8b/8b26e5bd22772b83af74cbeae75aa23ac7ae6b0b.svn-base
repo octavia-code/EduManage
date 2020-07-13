@@ -1,0 +1,140 @@
+@CHARSET "UTF-8";
+
+.login {
+	width: 100%;
+	height: 95%;
+	background-image: url(../img/login.jpg);
+	background-size: cover;
+	background-position: center;
+	position: absolute;
+}
+
+.login-con {
+	position: absolute;
+	/*left:0;*/
+	/*right:0;*/
+	right: 15%;
+	margin-left: auto;
+	margin-right: auto;
+	top: 50%;
+	transform: translateY(-60%);
+	width: 300px;
+}
+
+.card-title {
+	font-size: 28px;
+	text-align: center;
+	font-family: microsoft yahei;
+}
+
+.card-change {
+	float: right;
+	margin-bottom: 10px;
+	margin-right: 15px;
+}
+
+.a {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.login-error {
+	color: red;
+	padding-bottom: 10px;
+}
+
+.form-con {
+	padding: 0px 0 0;
+	height: 290px;
+}
+
+.login-bottom {
+	font-size: 10px;
+	text-align: center;
+	color: #c3c3c3;
+}
+
+.login-tip {
+	color: #c3c3c3;
+}
+
+.login-codeStyle {
+	width: 50%;
+}
+
+.login-btnStyle {
+	margin-left: 8px;
+	width: 45%;
+}
+
+.login-imgStyle {
+	height: 33px;
+	vertical-align: middle;
+	margin-left: 8px
+}
+
+.footer {
+	background-color: #1899FE;
+	width: 100%;
+	height: 5%;
+	position: fixed;
+	bottom: 0px;
+	z-index: -1;
+	text-align: center;
+}
+
+.footerSpan {
+	font: 25px "Microsoft Yahei", "Helvetica Neue";
+	margin-top: 20px;
+	font-weight: 15;
+	color: #FFFFFF;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-moz-font-feature-settings: "liga", "kern";
+}
+
+
+
+
+
+
+.pass-phoenix-btn{
+	height:25px;
+}
+
+
+.bd-acc-list{
+	padding-left:90px;
+	list-style-type:none;
+	height:25px;
+}
+.phoenix-btn-item {
+	float: left;
+    display: block;
+    margin-right: 15px;
+    color: #00C;
+    text-decoration: underline;
+    padding-left: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    list-style: none;
+    width: 0;
+    height: 25px;
+    overflow: hidden;
+}
+
+.bd-acc-tsina {
+	float: left;
+	height:25px;
+    background: url(/account/img/logo_sinaweibo.png) no-repeat;
+}
+.bd-acc-qzone {
+	float: left;
+	height:25px;
+    background: url(/account/img/logo_qq.png) no-repeat;
+}
+.bd-acc-weixin {
+	float: left;
+	height:25px;
+    background: url(/account/img/logo_wechat.png) no-repeat;
+}

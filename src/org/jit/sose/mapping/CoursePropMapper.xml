@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CoursePropMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseProp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="prop_name" property="propName" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, prop_name, user_id, created_date, state, state_date
+  </sql>
+  
+  <select id="selectCoursePropList" resultMap="BaseResultMap">
+    SELECT
+	    id,
+	    prop_name
+	FROM
+	    course_prop
+	WHERE
+	    state = 'A'
+	ORDER BY
+	    prop_name
+  </select>
+  
+  <!-- 过滤查询 -->
+  <select id="listByCourseProp" parameterType="org.jit.sose.entity.CourseProp"
+		resultMap="BaseResultMap">
+		SELECT 
+		<include refid="Base_Column_List" />
+		FROM
+			course_prop
+		WHERE
+			state = 'A'
+		<if test="propName != null">
+			and LOCATE(#{propName},prop_name)
+		</if>
+		ORDER BY id
+	</select>
+	<!-- 根据标识id查询学期信息 -->
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM course_prop
+    WHERE id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <!-- 通过id删除 -->
+  <update id="delete" parameterType="java.lang.Integer" >
+    UPDATE course_prop
+    SET state = 'X'
+    WHERE id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 插入信息 -->
+  <insert id="insert" parameterType="org.jit.sose.entity.CourseProp" >
+  
+  <!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+        SELECT
+		    count(*) AS count
+		FROM
+		    course_prop
+		WHERE
+		    state = 'A'
+		AND prop_name = #{propName,jdbcType=VARCHAR}
+    </selectKey>
+    
+    <!-- 如果等于0即不存在 才插入 -->
+    <if test="count == 0">
+	INSERT INTO course_prop
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="propName != null">
+				prop_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="propName != null">
+				#{propName,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</if>
+	
+	<!-- 若已存在数据，根据唯一属性值将该数据更新（唯一属性值就不要更新了） -->
+	<if test="count > 0">
+		UPDATE course_prop
+		<set>
+			<if test="propName != null">
+				prop_name = prop_name,
+			</if>
+		</set>
+		WHERE prop_name = #{propName,jdbcType=VARCHAR}
+	</if>
+  </insert>
+  <!-- 修改信息 -->
+  <update id="update" parameterType="org.jit.sose.entity.CourseProp" >
+    UPDATE course_prop
+    <set >
+      <if test="propName != null" >
+        prop_name = prop_name,
+      </if>
+    </set>
+    WHERE id = #{id,jdbcType=INTEGER}
+  </update>
+  <!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE course_prop
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+</mapper>

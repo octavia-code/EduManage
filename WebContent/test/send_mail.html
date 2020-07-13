@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>邮件箱</title>
+<script type="text/javascript" src="../public/common.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../public/ueditor-1.4.3.3/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../public/ueditor-1.4.3.3/ueditor.all.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../public/ueditor-1.4.3.3/lang/zh-cn/zh-cn.js"></script>
+<link rel="stylesheet" type="text/css" href="css/sendMail.css" />
+</head>
+<body>
+	<div class="layout-body" id="sendMail" v-cloak>
+		<layout-header></layout-header>
+		<div id="wrap">
+			<layout-sider></layout-sider>
+			<div class="layout-main">
+				<div class="qry">
+					<div class="layout-tab">
+						<div class="contentBox" style="	border-bottom: 2px solid #dbdbdb;border-top:0px;border-left:0px;border-right:0px;">
+							<div style="height: 30px; font-size: 20px; float: left;margin-right:5px;">收件人:</div>
+							<div style="height: 30px; float: left;">
+								<div id="recipientBox" style="float: left;height:25px;">
+								<div v-for="(item, index) in recipientBox" class="recipientInfo"><span class="recipientAddress">{{ item }}</span><button class="deleteRecipientButton" @click="deleteRecipient(index)">X</button></div>
+								</div>
+								<input id="text_Recipent" v-model="nowInputRecipient" @blur="addRecipient" @keyup="addRecipientWithKey(event)"/>
+								
+							</div>
+						</div>
+						<div class="contentBox" style="	border-bottom: 2px solid #dbdbdb;border-top:0px;border-left:0px;border-right:0px;">
+							<div style="height: 30px; font-size: 20px; float: left;margin-right:5px;">邮箱标题:</div>
+							<div style="height:30px;float:left;">
+							<div style="height:30px;float:left;">
+								<div id="titleBox">
+								<input id="text_title" v-model="mailTitle"/>
+								</div> 
+							</div>
+							</div>
+						</div>
+						<div>
+						<div class="contentBox">
+						<div style="height: 30px; font-size: 20px; float: left;">正文:</div>
+						</div>
+						<div style="width:1600px;height:500px;">
+						<script id="editor" type="text/plain" name="gdesc" style="width:100%;height:400px;"></script>
+						<script type="text/javascript">
+        					//实例化编辑器
+        					var ue = UE.getEditor('editor', {});
+    					</script>
+						</div>
+						</div>
+
+						<div style="margin-top:1%;margin-bottom:2%;text-align:center">
+							<i-button type="primary" :loading="sendLoading" style="height:60px;width:150px;" @click="sendMail">
+								<span v-if="!sendLoading" style="font-size:20px">发送</span>
+								<span v-else style="font-size:20px">发送中..</span>
+							</i-button>
+						</div>
+					</div>
+					<div style="clear: both"></div>
+				</div>
+			</div>
+		</div>
+			<layout-footer></layout-footer>
+	</div>
+
+			<script type="text/javascript" src="./js/send_mail.js"></script>
+</body>
+</html>

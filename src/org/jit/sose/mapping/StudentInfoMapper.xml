@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.StudentInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.StudentInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="student_name" property="studentName" jdbcType="VARCHAR" />
+		<result column="student_number" property="studentNumber"
+			jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="CHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="studentId" property="studentId" jdbcType="INTEGER" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, student_name, student_number, sex, remark,
+		created_date,
+		state_date,state
+	</sql>
+	<sql id="Name_Column_List">
+		s.id,s.student_name,s.student_number, s.sex, s.remark,
+		s.created_date, s.state_date,s.state
+	</sql>
+	<select id="selectStudentInfoList" resultMap="BaseResultMap">
+		SELECT
+		id,
+		student_name
+		FROM
+		student_info
+		WHERE
+		state = 'A'
+		ORDER BY
+		student_number
+	</select>
+	<select id="listByStudentInfo" parameterType="org.jit.sose.entity.StudentInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="Name_Column_List" />
+		,
+		e.code_name AS sexString
+		FROM
+		`student_info` s,
+		eecstate e
+		WHERE
+		1 = 1
+		AND
+		e.`table` = 'public'
+		AND e.colm = 'sex'
+		AND e.CODE =
+		s.sex
+		AND
+		s.state = 'A'
+		<if test="studentName != null">
+			and LOCATE(#{studentName},student_name)
+		</if>
+		<if test="studentNumber != null">
+			and LOCATE(#{studentNumber},student_number)
+		</if>
+		ORDER BY student_number
+	</select>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from student_info
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE student_info
+		SET state =
+		'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE student_info
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	<insert id="insert" parameterType="org.jit.sose.entity.StudentInfo">		
+			INSERT INTO student_info
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				student_name,
+				student_number,
+				sex,
+				<if test="remark != null">
+					remark,
+				</if>
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				#{studentName,jdbcType=VARCHAR},
+				#{studentNumber,jdbcType=VARCHAR},
+				#{sex,jdbcType=CHAR},
+				<if test="remark != null">
+					#{remark,jdbcType=VARCHAR},
+				</if>
+			</trim>
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.StudentInfo">
+		update student_info
+		<set>
+			<if test="studentName != null">
+				student_name = #{studentName,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=CHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<!-- 123 -->
+	<select id="selectStudentManage" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+		SELECT
+		a.id,
+		a.seq,
+		b.student_number,
+		b.student_name,
+		b.id AS studentId
+		FROM
+		course_class_student_info a,
+		student_info b
+		WHERE
+		a.course_class_info_id
+		= #{courseClassInfoId,jdbcType=INTEGER}
+		AND a.student_info_id =b.id
+		AND a.state='A'
+	</select>
+	<select id="listByMessage" parameterType="org.jit.sose.entity.StudentInfo"
+		resultMap="BaseResultMap">
+		SELECT DISTINCT
+		stu.id,
+		stu.student_number,
+		stu.student_name
+		FROM
+		student_info stu
+		LEFT JOIN class_student cs ON cs.student_info_id = stu.id
+		LEFT JOIN class_info cl ON cl.id = cs.class_info_id
+		LEFT JOIN year_plan ye ON ye.id = cl.year_plan_id
+		LEFT JOIN specialty sp ON sp.id = cl.specialty_id
+		LEFT JOIN school_info sch ON sch.id = sp.school_info_id
+		WHERE
+		stu.state = 'A'
+		AND cs.state = 'A'
+		AND cl.state = 'A'
+		AND ye.state = 'A'
+		AND sp.state = 'A'
+		AND stu.id NOT IN (
+		SELECT
+		stu.id
+		FROM
+		course_class_student_info cci,
+		student_info stu
+		WHERE
+		cci.course_class_info_id = #{courseClassInfoId,jdbcType=INTEGER}
+		AND cci.student_info_id = stu.id
+		AND cci.state = 'A'
+		)
+		<if test="schoolInfoId != null">
+		AND sch.id =#{schoolInfoId,jdbcType=INTEGER}
+		</if>
+		
+		<if test="yearPlanId != null">
+		AND ye.id = #{yearPlanId,jdbcType=INTEGER}
+		</if>
+		
+		<if test="specialtyId != null">
+		AND sp.id = #{specialtyId,jdbcType=INTEGER}
+		</if>
+		
+		<if test="classInfoId != null">
+		AND cl.id = #{classInfoId,jdbcType=INTEGER}
+		</if>
+		
+		<if test="studentName != null">
+		AND LOCATE(
+		#{studentName,jdbcType=VARCHAR}, stu.student_name)
+		</if>
+		
+		ORDER BY
+		id
+	</select>
+	<select id="countByStudentInfo" parameterType="org.jit.sose.entity.StudentInfo" resultType="java.lang.Integer">
+	SELECT
+	count(*)
+	FROM
+		student_info
+	WHERE
+		state = 'A'
+	AND student_number = #{studentNumber,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

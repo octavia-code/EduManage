@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>123456</title>
+    <script type="text/javascript" src="public/common.js"></script>
+</head>
+<style>
+    #app {
+        padding: 32px;
+    }
+
+    .layout {
+        border: 1px solid #d7dde4;
+        background: #f5f7f9;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .layout-logo {
+        width: 100px;
+        height: 30px;
+        background: #5b6270;
+        border-radius: 3px;
+        float: left;
+        position: relative;
+        top: 15px;
+        left: 20px;
+        color: #fff;
+        line-height:30px;
+    }
+
+    .layout-nav {
+        width: 300px;
+        margin: 0 auto;
+        margin-right: 20px;
+        color: #fff;
+    }
+	
+	.nowTime{
+		font-size:12px;
+		margin-left:20px;
+	}
+
+</style>
+<body>
+<script>
+</script>
+<div id="people">
+    <div class="layout">
+        <layout>
+            <i-header>
+                <i-menu mode="horizontal" theme="dark" active-name="1">
+                    <div class="layout-logo"><span>工程教育认证</span></div>
+                    <div class="layout-nav">
+                    	
+                    	<span>欢迎您</span>
+                    	<a href="javascript:void(0);">管理员</a>
+                    	<span class="nowTime">{{realTime}}</span>
+                        <!-- <menu-item name="1">
+                            <icon type="ios-navigate"></icon>
+                            Item 1
+                        </menu-item>
+                        <menu-item name="2">
+                            <icon type="ios-keypad"></icon>
+                            Item 2
+                        </menu-item>
+                        <menu-item name="3">
+                            <icon type="ios-analytics"></icon>
+                            Item 3
+                        </menu-item>
+                        <menu-item name="4">
+                            <icon type="ios-paper"></icon>
+                            Item 4
+                        </menu-item> -->
+                    </div>
+                </i-menu>
+            </i-header>
+            <layout>
+                <!-- <sider hide-trigger :style="{background: '#fff'}"> -->
+                    <!-- <i-menu active-name="1-2" theme="light" width="auto" :open-names="['1']">
+                        <submenu name="1">
+                            <template slot="title">
+                                <icon type="ios-navigate"></icon>
+                                Item 1
+                            </template>
+                            <menu-item name="1-1">Option 1</menu-item>
+                            <menu-item name="1-2">Option 2</menu-item>
+                            <menu-item name="1-3">Option 3</menu-item>
+                        </submenu>
+                        <submenu name="2">
+                            <template slot="title">
+                                <icon type="ios-keypad"></icon>
+                                Item 2
+                            </template>
+                            <menu-item name="2-1">Option 1</menu-item>
+                            <menu-item name="2-2">Option 2</menu-item>
+                        </submenu>
+                        <submenu name="3">
+                            <template slot="title">
+                                <icon type="ios-analytics"></icon>
+                                Item 3
+                            </template>
+                            <menu-item name="3-1">Option 1</menu-item>
+                            <menu-item name="3-2">Option 2</menu-item>
+                        </submenu>
+                    </i-menu> -->
+               <sider hide-trigger>
+                    <i-menu theme="dark" :active-name="activeName" :open-names="openMenu" @on-select="onSelectMenu" width="auto">
+				        <submenu v-for="submenu in menuList" :name="submenu.url">
+				            <template slot="title">
+				                {{submenu.name}}
+				            </template>
+				            <menu-item v-for="menu in submenu.menuList" :name="menu.url">
+				                {{menu.name}}
+				            </menu-item>
+				        </submenu>
+				    </i-menu>
+                </sider>
+                <layout :style="{padding: '0 24px 24px'}">
+                    <breadcrumb :style="{margin: '24px 0'}">
+                        <breadcrumb-item>Home</breadcrumb-item>
+                        <breadcrumb-item>Components</breadcrumb-item>
+                        
+                        <breadcrumb-item>Layout</breadcrumb-item>
+                    </breadcrumb>
+                    <i-content :style="{padding: '24px', minHeight: '500px', background: '#fff'}">
+                        <!-- <div id="child-url" v-html="html"></div> -->
+                        <iframe id="index-iframe" :src="html" width="100%" height="100%" scrolling="no"  frameborder="0">
+							 您的浏览器不支持iframe，请升级
+						 </iframe>
+                    </i-content>
+                </layout>
+            </layout>
+        </layout>
+    </div>
+
+</div>
+<script type="text/javascript" src="./menu.js"></script>
+</body>
+</html>
+

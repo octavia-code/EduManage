@@ -1,0 +1,32 @@
+@CHARSET "UTF-8";
+.first {
+	padding-top:40px;
+	padding-bottom:10px;
+}
+
+.first-left{
+	display:inline;
+	margin-left:40px;
+}
+
+.first-right{
+	display:inline;
+	float:right;
+	margin-right:40px;
+}
+
+.ivu-table .table-cell-info-pstate-pass {
+	color: green;
+}
+
+.ivu-table .table-cell-info-pstate-back {
+	color: red;
+}
+
+.modal-item{
+	height:40px;
+}
+
+.layout-main{
+	overflow-y: hidden;
+}

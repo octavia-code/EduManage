@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.AssessmentMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.Assessment" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="assess_name" property="assessName" jdbcType="VARCHAR" />
+    <result column="assess_rate" property="assessRate" jdbcType="INTEGER" />
+    <result column="course_outline_id" property="courseOutlineId" jdbcType="INTEGER" />
+    <result column="seq" property="seq" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <resultMap id="AssessItemMap" type="org.jit.sose.entity.Assessment" extends="BaseResultMap">
+    <collection property="assessItemList" column="id" ofType="org.jit.sose.entity.AssessItem"
+                select="org.jit.sose.mapper.AssessItemMapper.listByAssessmentId"></collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, assess_name, assess_rate, course_outline_id, seq
+  </sql>
+  <sql id="Select_Column_List" >
+    ${tableName}.id, ${tableName}.assess_name, ${tableName}.assess_rate, 
+    ${tableName}.course_outline_id, ${tableName}.seq
+  </sql>
+  
+  <select id="listTreeByCourseOutlineId" parameterType="java.lang.Integer" resultMap="AssessItemMap">
+    SELECT
+        <include refid="Select_Column_List">
+           <property name="tableName" value="a"/>
+        </include>
+    FROM
+        assessment a
+    WHERE
+        a.state = 'A'
+    AND a.course_outline_id = #{courseOutlineId,jdbcType=INTEGER}
+    ORDER BY
+    a.seq
+  </select>
+  
+  <select id="listByCourseOutlineId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+      SELECT
+	    a.id,
+	    a.assess_name,
+	    a.assess_rate
+	FROM
+	    assessment a
+	WHERE
+	    a.state = 'A'
+	AND a.course_outline_id = #{courseOutlineId,jdbcType=INTEGER}
+	ORDER BY
+	    a.seq
+  </select>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from assessment
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from assessment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.jit.sose.entity.Assessment" >
+    insert into assessment
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        assess_name,
+        assess_rate,
+        course_outline_id,
+        seq
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{assessName,jdbcType=VARCHAR},
+        #{assessRate,jdbcType=INTEGER},
+        #{courseOutlineId,jdbcType=INTEGER},
+        #{seq,jdbcType=INTEGER}
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.Assessment" >
+    update assessment
+    <set >
+      <if test="assessName != null" >
+        assess_name = #{assessName,jdbcType=VARCHAR},
+      </if>
+      <if test="assessRate != null" >
+        assess_rate = #{assessRate,jdbcType=INTEGER},
+      </if>
+      <if test="courseOutlineId != null" >
+        course_outline_id = #{courseOutlineId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        seq = #{seq,jdbcType=INTEGER},
+      </if>
+      </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="delete" parameterType="org.jit.sose.entity.Assessment">
+  	update assessment
+  	set state = 'X'
+  	where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="deleteByCourseOutlineId">
+	 UPDATE assessment
+		SET state = 'X'
+	 WHERE
+		course_outline_id = #{courseOutlineId,jdbcType=INTEGER}
+  </update> 
+  
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.Assessment" >
+    update assessment
+    <set >
+      <if test="assessName != null" >
+        assess_name = #{assessName,jdbcType=VARCHAR},
+      </if>
+      <if test="assessRate != null" >
+        assess_rate = #{assessRate,jdbcType=INTEGER},
+      </if>
+      <if test="courseOutlineId != null" >
+        course_outline_id = #{courseOutlineId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        seq = #{seq,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>

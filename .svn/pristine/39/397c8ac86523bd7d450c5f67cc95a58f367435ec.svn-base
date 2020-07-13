@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!-- 自动扫描 -->
+	<context:annotation-config />
+	
+	<!-- 扫描包中的注解，方式一 -->
+	<context:component-scan
+		base-package="org.jit.sose">
+		<!-- 制定扫包规则，不扫描@Controller注解的JAVA类，其他的还是要扫描 -->
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<!-- 扫描包，方式二 ,扫描多个包时比较繁琐-->
+	<!-- <context:component-scan base-package="org.jit.sose.mapper" />
+	<context:component-scan base-package="org.jit.sose.service" />-->
+
+	<!-- 引入自定义配置,使用都好隔开 -->
+	<!-- <context:property-placeholder
+		location="classpath:resource/qcloudSms.properties" /> -->
+
+	<bean id="appProperty"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<array>
+				<value>classpath:resource/test.properties</value>
+			</array>
+		</property>
+	</bean> 	
+	
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://118.24.100.209:4000/jittest_0?characterEncoding=utf-8&amp;useSSL=true&amp;allowMultiQueries=true"  />
+		<property name="username" value="root" />
+		<property name="password" value="P@ssw0rdjit1230" />
+	</bean>
+	
+	
+	<!-- 配置数据源方式二 -->
+	<!-- <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:jdbc.properties" />
+    </bean> -->
+    <!-- <context:property-placeholder location="classpath:jdbc.properties" /> -->
+    <!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+        destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean> -->
+
+	<!-- 配置mybatis的sqlSessionFactory ，不需要mybatis的配置映射文件-->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="org.jit.sose.entity" />
+		<!-- 自动扫描mappers.xml文件 -->
+		<property name="mapperLocations" value="classpath:org/jit/sose/mapping/*.xml" />
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							dialect=mysql
+							reasonable=true
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<!-- DAO接口所在包名，Spring会自动查找其下的类 
+		 MapperScannerConfigurer 自动扫描 将Mapper接口生成代理注入到Spring
+		 它将会查找类路径下的映射器并自动将它们创建成MapperFactoryBean
+		 MapperFactoryBean 创建的代理类实现了com.dylan.dao下的接口,并且注入到应用程序中。-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- basePackage 属性是映射器接口文件的包路径。
+		 	 可以使用分号或逗号 作为分隔符设置多于一个的包路径。
+		 	 每个映射器将会在指定的包路径中递归地被搜索到。 -->
+		<property name="basePackage" value="org.jit.sose.mapper" />
+		<!-- 如果使用了一个以上的 DataSource ,那么自动装配可能会失效
+			 所以可以使用sqlSessionFactoryBeanName 或 sqlSessionTemplateBeanName属性来设置正确的bean名称来使用 
+			 bean的名称是必须的,而不是bean的引用,因此,value属性在这里替代通常的 ref -->
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<!-- <property name="sqlSessionFactory" value="sqlSessionFactory" /> -->
+		<!-- <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property> -->
+	</bean>
+
+	<!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 5. 使用声明式事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+		
+
+</beans>

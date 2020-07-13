@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="./js/cookieUtil.js"></script>
+    <title>tese</title>
+</head>
+<script>
+    let delay = '72d';
+
+    console.log(unit);
+</script>
+<body>
+
+</body>
+</html>

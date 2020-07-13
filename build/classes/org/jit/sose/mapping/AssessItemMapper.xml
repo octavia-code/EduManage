@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.AssessItemMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.AssessItem" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="assessment_id" property="assessmentId" jdbcType="INTEGER" />
+    <result column="indicator_sec_id" property="indicatorSecId" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="max_score" property="maxScore" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, assessment_id, indicator_sec_id, content, max_score, remark, state, created_date, 
+    state_date
+  </sql>
+  
+  <sql id="Select_Column_List" >
+    ${tableName}.id, ${tableName}.assessment_id, ${tableName}.indicator_sec_id, ${tableName}.content, 
+    ${tableName}.max_score, ${tableName}.remark
+  </sql>
+  
+  <select id="listByAssessmentId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    SELECT
+	    <include refid="Select_Column_List">
+	       <property name="tableName" value="ai"/>
+	    </include>, 
+	    s.content AS indicatorSecContent
+	FROM
+	    assess_item ai
+	INNER JOIN indicator_sec s ON ai.indicator_sec_id = s.id
+	WHERE
+	    ai.state = 'A'
+	AND assessment_id = #{assessmentId,jdbcType=INTEGER}
+  </select>
+  
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from assess_item
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from assess_item
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.jit.sose.entity.AssessItem" >
+    insert into assess_item
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        assessment_id,
+        indicator_sec_id,
+        content,
+        max_score,
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{assessmentId,jdbcType=INTEGER},
+        #{indicatorSecId,jdbcType=INTEGER},
+        #{content,jdbcType=VARCHAR},
+        #{maxScore,jdbcType=INTEGER},
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.AssessItem" >
+    update assess_item
+    <set >
+      <if test="assessmentId != null" >
+        assessment_id = #{assessmentId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorSecId != null" >
+        indicator_sec_id = #{indicatorSecId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="maxScore != null" >
+        max_score = #{maxScore,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="delete" parameterType="java.lang.Integer" >
+    UPDATE assess_item
+	SET state = 'X'
+	WHERE
+	id = #{id,jdbcType=INTEGER}
+  </update>
+  
+ <update id="deleteByCourseOutlineId">
+	 UPDATE assess_item i
+		SET i.state = 'X'
+	 WHERE
+		i.assessment_id IN (
+			SELECT
+			a.id
+		FROM
+			assessment a
+		WHERE
+			a.course_outline_id = #{courseOutlineId,jdbcType=INTEGER}
+	)
+  </update>
+  
+ 	<update id="deleteByAssessmentId">
+ 		UPDATE assess_item
+		SET state = 'X'
+	 WHERE
+	 	assessment_id = #{assessmentId,jdbcType=INTEGER}
+ 	</update>
+ 	
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.AssessItem" >
+    update assess_item
+    <set >
+      <if test="assessmentId != null" >
+        assessment_id = #{assessmentId,jdbcType=INTEGER},
+      </if>
+      <if test="indicatorSecId != null" >
+        indicator_sec_id = #{indicatorSecId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="maxScore != null" >
+        max_score = #{maxScore,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CourseOutlineMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseOutline" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="outline_no" property="outlineNo" jdbcType="CHAR" />
+    <result column="course_info_id" property="courseInfoId" jdbcType="INTEGER" />
+    <result column="course_outline_type_id" property="courseOutlineTypeId" jdbcType="INTEGER" />
+    <result column="outline_name" property="outlineName" jdbcType="VARCHAR" />
+    <result column="file_info_id" property="fileInfoId" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <resultMap id="AssessmentMap" type="org.jit.sose.entity.CourseOutline" extends="BaseResultMap">
+    <collection property="assessmentList" column="id"  ofType="org.jit.sose.entity.Assessment"
+        select="org.jit.sose.mapper.AssessmentMapper.listTreeByCourseOutlineId"></collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, outline_no, course_info_id, course_outline_type_id, outline_name, file_info_id, remark
+  </sql>
+  <sql id="Select_Column_List" >
+    ${tableName}.id, ${tableName}.outline_no, ${tableName}.course_info_id, ${tableName}.course_outline_type_id, 
+    ${tableName}.outline_name, ${tableName}.file_info_id, ${tableName}.remark
+  </sql>
+  
+  <select id="selectCourseOutlineList" resultMap="BaseResultMap">
+   SELECT
+		co.id,
+		co.outline_name,
+		e.code_name AS outlineNoName
+	FROM
+		course_outline co
+	INNER JOIN eecstate e ON e.`table` = 'course_outline'
+	AND e.colm = 'outline_no'
+	AND e.`code` = co.outline_no
+	WHERE
+		co.state = 'A'
+	ORDER BY
+		co.outline_name
+  </select>
+  <select id="selectByCourseOutline" parameterType="java.util.Map" resultMap="AssessmentMap">
+    SELECT
+	    <include refid="Select_Column_List">
+	       <property name="tableName" value="co"/>
+	    </include>, 
+	    e.code_name AS outlineNoName,
+	    t.type_name AS typeName,
+	    i.course_name AS courseName,
+	    f.file_name AS fileName,
+        f.access_url AS accessUrl
+	FROM
+	    course_outline co
+	INNER JOIN eecstate e ON e.`table` = 'course_outline'
+	AND e.colm = 'outline_no'
+	AND e.`code` = co.outline_no
+	INNER JOIN course_outline_type t ON co.course_outline_type_id = t.id
+	INNER JOIN course_info i ON co.course_info_id = i.id
+	LEFT JOIN file_info f ON co.file_info_id = f.id AND f.state = 'A'
+	WHERE
+	    co.state = 'A'
+	AND co.outline_no = #{outlineNo,jdbcType=CHAR}
+	AND co.course_outline_type_id = #{courseOutlineTypeId,jdbcType=INTEGER}
+	AND co.course_info_id = #{courseInfoId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="listOutlineNoByEecstate" resultMap="BaseResultMap">
+	SELECT
+	    `code` AS outline_no,
+	    code_name AS outlineNoName
+	FROM
+	    eecstate
+	WHERE
+	    `table` = 'course_outline'
+	AND colm = 'outline_no'
+	AND state = 'A'
+	ORDER BY
+	    seq DESC
+  </select>
+  
+  <select id="listByCourseOutline" resultMap="BaseResultMap" parameterType="org.jit.sose.entity.CourseOutline" >
+    SELECT
+	    co.id,
+	    co.outline_name,
+	    co.course_info_id,
+	    e.code_name AS outlineNoName
+	FROM
+	    `course_outline` co
+	INNER JOIN eecstate e ON e.`table` = 'course_outline'
+	AND e.colm = 'outline_no'
+	AND e.`code` = co.outline_no
+	WHERE
+	    co.state = 'A'
+    <if test="outlineNo != null" >
+      AND co.outline_no = #{outlineNo,jdbcType=CHAR}
+    </if>
+    <if test="courseInfoId != null" >
+      AND co.course_info_id = #{courseInfoId,jdbcType=INTEGER}
+    </if>
+    <if test="courseOutlineTypeId != null" >
+      AND co.course_outline_type_id = #{courseOutlineTypeId,jdbcType=INTEGER}
+    </if>
+    <if test="outlineName != null" >
+      AND LOCATE(#{outlineName,jdbcType=VARCHAR},co.outline_name)
+    </if>
+  </select>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from course_outline
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from course_outline
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="org.jit.sose.entity.CourseOutline" >
+    insert into course_outline
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        outline_no,
+        course_info_id,
+        course_outline_type_id,
+        outline_name,
+        file_info_id,
+      <if test="remark != null" >
+        remark
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{outlineNo,jdbcType=CHAR},
+        #{courseInfoId,jdbcType=INTEGER},
+        #{courseOutlineTypeId,jdbcType=INTEGER},
+        #{outlineName,jdbcType=VARCHAR},
+        #{fileInfoId,jdbcType=INTEGER},
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="org.jit.sose.entity.CourseOutline" >
+    update course_outline
+    <set>
+      <if test="outlineName != null" >
+        outline_name = #{outlineName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileInfoId != null" >
+        file_info_id = #{fileInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+     </set> 
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+   <update id="delete" parameterType="java.lang.Integer" >
+    UPDATE course_outline
+    SET state = 'X'
+    WHERE id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.CourseOutline" >
+    update course_outline
+    <set >
+      <if test="outlineNo != null" >
+        outline_no = #{outlineNo,jdbcType=CHAR},
+      </if>
+      <if test="courseInfoId != null" >
+        course_info_id = #{courseInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="courseOutlineTypeId != null" >
+        course_outline_type_id = #{courseOutlineTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="outlineName != null" >
+        outline_name = #{outlineName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileInfoId != null" >
+        file_info_id = #{fileInfoId,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null" >
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null" >
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>

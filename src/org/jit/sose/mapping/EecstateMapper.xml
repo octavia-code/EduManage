@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.EecstateMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.Eecstate">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="table" property="table" jdbcType="VARCHAR" />
+		<result column="table_name" property="tableName" jdbcType="VARCHAR" />
+		<result column="colm" property="colm" jdbcType="VARCHAR" />
+		<result column="colm_name" property="colmName" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="CHAR" />
+		<result column="code_name" property="codeName" jdbcType="VARCHAR" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="CHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,`table`,  table_name, colm, colm_name, code, code_name, seq, remark,
+		state,
+		create_date, state_date
+	</sql>
+	
+	<select id="countByEecstate" parameterType="org.jit.sose.entity.Eecstate" resultType="java.lang.Integer">
+
+		SELECT
+		COUNT(*)
+		FROM
+		eecstate
+		WHERE
+		state = 'A'
+		AND `table` = #{table,jdbcType=VARCHAR}
+		AND colm  =  #{colm,jdbcType=VARCHAR}
+		AND `code` = #{code,jdbcType=CHAR}
+
+	</select>
+	
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from eecstate
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE eecstate
+		SET state = 'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE eecstate
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+
+	<insert id="insert" parameterType="org.jit.sose.entity.Eecstate">
+		insert into eecstate
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+		    <if test="table != null">
+				`table`,
+			</if>
+			<if test="tableName != null">
+				table_name,
+			</if>
+			<if test="colm != null">
+				colm,
+			</if>
+			<if test="colmName != null">
+				colm_name,
+			</if>
+			<if test="code != null">
+				`code`,
+			</if>
+			<if test="codeName != null">
+				code_name,
+			</if>
+			<if test="seq != null">
+				seq,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="tableName != null">
+			<if test="table != null">
+				#{table,jdbcType=VARCHAR},
+			</if>
+				#{tableName,jdbcType=VARCHAR},
+			</if>
+			<if test="colm != null">
+				#{colm,jdbcType=VARCHAR},
+			</if>
+			<if test="colmName != null">
+				#{colmName,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=CHAR},
+			</if>
+			<if test="codeName != null">
+				#{codeName,jdbcType=VARCHAR},
+			</if>
+			<if test="seq != null">
+				#{seq,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="org.jit.sose.entity.Eecstate">
+		update eecstate
+		<set>
+				`table` = #{table,jdbcType=VARCHAR},
+				table_name = #{tableName,jdbcType=VARCHAR},
+				colm = #{colm,jdbcType=VARCHAR},
+				colm_name = #{colmName,jdbcType=VARCHAR},
+				`code` = #{code,jdbcType=CHAR},
+				code_name = #{codeName,jdbcType=VARCHAR},
+			<if test="seq != null">
+				seq = #{seq,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="listByEecstate" parameterType="org.jit.sose.entity.Eecstate"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		eecstate
+		WHERE
+		state = 'A'
+		<if test="tableName != null">
+			and LOCATE(#{tableName},table_name)
+		</if>
+		<if test="colmName != null">
+			and LOCATE(#{colmName},colm_name)
+		</if>
+		
+		ORDER BY id DESC
+	</select>
+</mapper>

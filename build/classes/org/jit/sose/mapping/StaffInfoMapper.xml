@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.StaffInfoMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.StaffInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="staff_name" property="staffName" jdbcType="VARCHAR" />
+    <result column="staff_code" property="staffCode" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="birthday" property="birthday" jdbcType="DATE" />
+    <result column="sex" property="sex" jdbcType="CHAR" />
+    <result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, staff_name, staff_code, user_id, birthday, sex, created_date, state_date, state
+  </sql>
+  
+  <sql id="Name_Column_List" >
+    s.id, s.staff_name, s.staff_code, s.user_id, s.birthday, s.sex, s.created_date, s.state_date, s.state
+  </sql>
+  
+  <!-- 查询教师工号和教师名称集合 -->
+	<select id="selectStaffInfoList" resultMap="BaseResultMap">
+		SELECT
+		id,
+		staff_code,
+		staff_name
+		FROM
+		staff_info
+		WHERE
+		state = 'A'
+		ORDER BY
+		id DESC
+	</select>
+	
+  <!-- 过滤查询员工信息 -->
+  <select id="listByStaffInfo" parameterType="org.jit.sose.entity.StaffInfo" 
+  		resultMap="BaseResultMap">
+  		SELECT
+  		    <include refid="Name_Column_List"/>, 
+  		    e.code_name AS sexString,
+			s.birthday AS birthdayString
+		FROM
+			`staff_info` s,
+			eecstate e
+		WHERE
+			1 = 1
+		AND e.`table` = 'public'
+		AND e.colm = 'sex'
+		AND e.CODE = s.sex
+		AND s.state = 'A'
+        <if test="staffName != null">
+            and LOCATE(#{staffName},staff_name)
+        </if>
+        <if test="staffCode != null">
+            and LOCATE(#{staffCode},staff_code)
+        </if>
+        ORDER BY staff_code
+  </select>
+  
+  <!-- 根据员工信息标识id查询员工信息 -->
+  <select id="selectById" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+			staff_info
+		WHERE
+			id = #{id,jdbcType=INTEGER}
+	</select>
+	
+  <!-- 逻辑删除 -->
+  <update id="delete" parameterType="java.lang.Integer">
+		UPDATE staff_info
+		SET state = 'X'
+		WHERE id = #{id,jdbcType=INTEGER}
+	</update>
+	
+  <!-- 批量逻辑删除 -->
+  <update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE staff_info
+		SET state = 'X'
+		WHERE id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+   	</update>
+   
+   <!-- 插入 -->
+	<insert id="insert" parameterType="org.jit.sose.entity.StaffInfo">
+	    <!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据
+	         2、要求实体类中包含count属性即 AS 后的属性,若实体类中包含count，就换一个别的 -->
+	    <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
+	        SELECT
+			    count(*) AS count
+			FROM
+			    staff_info
+			WHERE
+			    state = 'A'
+			AND staff_code = #{staffCode,jdbcType=VARCHAR}
+	    </selectKey>
+	    
+	    <!-- 如果等于0即不存在 才插入 -->
+	    <if test="count == 0">
+			INSERT INTO staff_info
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+					staff_name,
+					staff_code,
+					user_id,
+				 <if test="birthday != null" >
+			        birthday,
+			      </if>
+			      <if test="sex != null" >
+			        sex,
+			      </if>
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+					#{staffName,jdbcType=VARCHAR},
+					#{staffCode,jdbcType=VARCHAR},
+					#{userId,jdbcType=INTEGER},
+					<if test="birthday != null" >
+			        #{birthday,jdbcType=DATE},
+				      </if>
+			      <if test="sex != null" >
+			        #{sex,jdbcType=CHAR},
+			      </if>
+			</trim>
+		</if>
+		
+		<!-- 若已存在数据，根据唯一属性值将该数据更新（唯一属性值就不要更新了） -->
+		<if test="count > 0">
+		      UPDATE staff_info
+		         	<set >
+				      <if test="staffName != null" >
+				        staff_name = #{staffName,jdbcType=VARCHAR},
+				      </if>
+				      <if test="birthday != null" >
+				        birthday = #{birthday,jdbcType=DATE},
+				      </if>
+				      <if test="sex != null" >
+				        sex = #{sex,jdbcType=CHAR},
+				      </if>
+				    </set>
+	          WHERE
+	             staff_code = #{staffCode,jdbcType=VARCHAR}
+		</if>
+	</insert>
+  <!-- 修改 -->
+  <update id="update" parameterType="org.jit.sose.entity.StaffInfo" >
+    UPDATE staff_info
+    <set >
+      <if test="staffName != null" >
+        staff_name = #{staffName,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null" >
+        birthday = #{birthday,jdbcType=DATE},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=CHAR},
+      </if>
+    </set>
+    WHERE id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

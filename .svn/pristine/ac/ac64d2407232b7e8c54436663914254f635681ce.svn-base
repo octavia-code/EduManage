@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.CourseClassStudentInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.CourseClassStudentInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="course_class_info_id" property="courseClassInfoId"
+			jdbcType="INTEGER" />
+		<result column="student_info_id" property="studentInfoId"
+			jdbcType="INTEGER" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+		<result column="stu_state" property="stuState" jdbcType="CHAR" />
+	</resultMap>
+	
+	<resultMap type="org.jit.sose.entity.CourseClassStudentInfo" id="ScoreResultMap" extends="BaseResultMap">
+	    <collection column="{courseClassStudentInfoId = courseClassStudentInfoId,gradeFormId = gradeFormId,courseOutlineId = courseOutlineId}" property="scoreAssessmentList" 
+	        ofType="org.jit.sose.entity.ScoreAssessment"
+	        select="org.jit.sose.mapper.ScoreAssessmentMapper.listWithStudent"></collection>
+	  </resultMap>
+	  
+	  <sql id="Base_Column_List">
+        id, course_class_info_id, student_info_id, seq, state_date,
+        created_date,
+        state
+    </sql>
+  
+  <select id="listStudentWithScore" parameterType="java.util.Map" resultMap="ScoreResultMap">
+   SELECT
+		ccs.id AS courseClassStudentInfoId,
+		ccs.seq,
+		s.student_number AS studentNumber,
+		s.student_name AS studentName,
+		g.id AS gradeFormId,
+		co.id AS courseOutlineId,
+		st.id AS scoreTotalId,
+		st.total_score AS totalScore
+	FROM
+		(
+			course_class_student_info ccs,
+			student_info s
+		)
+	LEFT JOIN score_total st ON st.cou_id = ccs.id
+	AND st.state = 'A'
+	LEFT JOIN grade_form g ON g.id = #{gradeFormId,jdbcType=INTEGER}
+	LEFT JOIN course_outline co ON co.id = #{courseOutlineId,jdbcType=INTEGER}
+	WHERE
+		ccs.course_class_info_id = #{courseClassInfoId,jdbcType=INTEGER}
+	AND ccs.student_info_id = s.id
+	AND ccs.state = 'A'
+	 
+  </select>
+
+	<select id="listByCourseClassInfoId" resultType="java.lang.Integer"
+		parameterType="java.util.List">
+		SELECT
+		id
+		FROM
+		course_class_student_info
+		WHERE
+		state = 'A'
+		AND course_class_info_id=#{courseClassInfoId,jdbcType=INTEGER}
+	</select>
+
+	<select id="countSame" resultType="java.lang.Integer"
+		parameterType="org.jit.sose.entity.CourseClassStudentInfo">
+		SELECT
+		COUNT(*)
+		FROM
+		course_class_student_info ccs
+		WHERE
+		ccs.state = 'A'
+		AND ccs.course_class_info_id=#{courseClassInfoId,jdbcType=INTEGER}
+		AND ccs.student_info_id=#{studentInfoId,jdbcType=INTEGER}
+	</select>
+
+	<insert id="insertList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO course_class_student_info (
+		course_class_info_id,
+		student_info_id,
+		seq
+		)VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.courseClassInfoId,jdbcType=INTEGER},
+			#{item.studentInfoId,jdbcType=INTEGER},
+			#{item.seq,jdbcType=INTEGER}
+			)
+		</foreach>
+	</insert>
+
+  
+    <insert id="insertOrUpdateList" parameterType="java.util.Map">
+		INSERT INTO course_class_student_info (
+		    id,
+		    course_class_info_id,
+		    student_info_id,
+		    seq
+		)
+		VALUES
+		<foreach collection="courseClassStudentInfoList" item="courseClassStudentInfo"  separator=",">
+		(
+	        (
+	            SELECT
+	                ccs.id
+	            FROM
+	                course_class_student_info ccs
+	            INNER JOIN course_class_info c ON ccs.course_class_info_id = c.id
+	            AND c.id = #{courseClassInfoId,jdbcType=INTEGER}
+	            AND c.state = 'A'
+	            INNER JOIN student_info s ON ccs.student_info_id = s.id
+	            AND s.student_number = #{courseClassStudentInfo.studentNumber,jdbcType=VARCHAR}
+	            AND s.state = 'A'
+	            WHERE
+	                ccs.state = 'A'
+	        ),
+	        #{courseClassInfoId,jdbcType=INTEGER},
+	        (
+	            SELECT
+	                s.id
+	            FROM
+	                student_info s
+	            WHERE
+	                s.student_number = #{courseClassStudentInfo.studentNumber,jdbcType=VARCHAR}
+	        ),
+	        #{courseClassStudentInfo.seq,jdbcType=INTEGER}
+	    )
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		      seq = VALUES(seq)
+	</insert>
+  
+  	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE course_class_student_info
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	
+	<update id="SortSeq" parameterType="org.jit.sose.entity.StudentInfo">
+		UPDATE course_class_student_info
+		SET seq=#{seq,jdbcType=INTEGER}
+		WHERE
+		course_class_info_id=#{courseClassInfoId,jdbcType=INTEGER}
+		AND
+		student_info_id=#{studentId,jdbcType=INTEGER}
+		AND
+		state='A'
+	</update>
+	<select id="exportStudentInfo" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+		SELECT
+		a.id,
+		a.seq,
+		b.student_number AS studentNumber,
+		b.student_name AS studentName
+		FROM
+		course_class_student_info a,
+		student_info b
+		WHERE
+		a.course_class_info_id
+		= #{courseClassInfoId,jdbcType=INTEGER}
+		AND a.student_info_id =b.id
+		AND a.state='A'
+	</select>
+</mapper>

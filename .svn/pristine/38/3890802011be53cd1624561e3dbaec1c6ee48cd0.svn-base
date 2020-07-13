@@ -1,0 +1,27 @@
+package org.jit.sose.service.impl;
+
+import java.util.List;
+
+import org.jit.sose.entity.FileInfo;
+import org.jit.sose.mapper.FileInfoMapper;
+import org.jit.sose.service.FileInfoSerivce;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class FileInfoServiceImpl implements FileInfoSerivce {
+
+	@Autowired
+	private FileInfoMapper fileInfoMapper;
+
+	@Override
+	public void insert(FileInfo record) {
+		fileInfoMapper.insert(record);
+	}
+
+	@Override
+	public Integer insertFileInfoList(List<FileInfo> list) {
+		return fileInfoMapper.insertFileInfoList(list);
+	}
+
+}

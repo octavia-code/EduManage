@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>工程教育认证-登录界面</title>
+    <!-- <script type="text/javascript" src="../public/common.js"></script>
+    <script type="text/javascript" src="../public/other/js/cookieUtil.js"></script>
+    <link rel="stylesheet" type="text/css" href="../account/css/login.css"> -->
+    
+    <script type="text/javascript" src="public/common.js"></script>
+    <script type="text/javascript" src="public/other/js/cookieUtil.js"></script>
+    <link rel="stylesheet" type="text/css" href="account/css/login.css">
+</head>
+<body>
+<div class="login">
+    <!-- 登录 -->
+    <div class="login-con" id="login" @keydown.enter="loginSubmit" v-cloak>
+        <Card :bordered="false">
+            <div slot="title" class="card-title">
+                <span v-show="loginType == 'account'">账号登录</span> <span v-show="loginType == 'phone'">手机登录</span>
+            </div>
+            <div class="card-change">
+                <a v-show="loginType == 'phone'" @click="loginByAccount">
+                    <Icon :size="14" type="log-in"></Icon>
+                    账号登录
+                </a>
+                <a v-show="loginType == 'account'" @click="loginByPhone" class="a">
+                    <Icon :size="16" type="iphone"></Icon>
+                    手机登录</a>
+            </div>
+            <div class="form-con">
+                <p class="login-error" v-show="loginType == 'account'">{{loginError}}</p>
+                <p class="login-error" v-show="loginType == 'phone'">{{phoneError}}</p>
+                <!--账户表单-->
+                <div v-show="loginType == 'account'">
+                    <i-form ref="accountForm" :model="accountForm" :rules="accountRules">
+                        <form-item prop="userName">
+                            <i-input v-model="accountForm.userName" placeholder="请输入用户名">
+										<span slot="prepend"> <Icon :size="16" type="person"></Icon>
+					</span></i-input>
+                        </form-item>
+
+                        <form-item prop="password">
+                            <i-input type="password" v-model="accountForm.password" placeholder="请输入密码"> <span
+                                    slot="prepend"> <Icon :size="14" type="locked"></Icon>
+					</span></i-input>
+                        </form-item>
+
+                        <form-item prop="code">
+                            <i-input type="text" v-model="accountForm.code" placeholder="请输入验证码" size="large"
+                                     class="login-codeStyle"></i-input>
+                            <img class="login-imgStyle" id="accountImg" :src="imgSrc" onclick="refreshAccountImg()">
+                        </form-item>
+
+                        <form-item>
+                            <i-button @click="loginSubmit" type="primary" long>登录
+                            </i-button>
+                        </form-item>
+
+
+                    </i-form>
+                </div>
+                <!--手机表单-->
+                <div v-show="loginType == 'phone'">
+                    <i-form ref="phoneForm" :model="phoneForm" :rules="phoneRules">
+                        <form-item prop="phone">
+                            <i-input v-model="phoneForm.phone" placeholder="请输入手机号码">
+                                <span slot="prepend"> <Icon :size="16" type="iphone"></Icon></span>
+                            </i-input>
+                        </form-item>
+                        <form-item prop="msgCode">
+                            <i-input type="text" v-model="phoneForm.msgCode" placeholder="请输入短信验证码" size="large"
+                                     class="login-codeStyle"></i-input>
+                            <i-button size="large" @click="sendMessage()" :disabled="btnDisabled"
+                                      class="login-btnStyle">{{btnSendCode}}
+                            </i-button>
+                        </form-item>
+                        <form-item prop="code">
+                            <i-input type="text" v-model="phoneForm.code" placeholder="请输入图形验证码" size="large"
+                                     class="login-codeStyle"></i-input>
+                            <img class="login-imgStyle" id="phoneImg" :src="imgSrc" onclick="refreshPhoneImg()">
+                        </form-item>
+                        <form-item>
+                            <i-button @click="loginSubmit" type="primary" long>登录
+                            </i-button>
+                        </form-item>
+                    </i-form>
+                </div>
+
+                <!-- <div class="pass-phoenix-btn clearfix" id="pass_phoenix_btn">
+                    <ul class="bd-acc-list">
+                        <li class="bd-acc-tsina" data-dialog="1" data-acc="2" data-height="669" data-width="800">
+                            <a class="phoenix-btn-item" href="#" data-title="tsina" title="新浪微博">新浪微博</a>
+                        </li>
+                        <li class="bd-acc-qzone" data-dialog="1" data-acc="15" data-height="450" data-width="750">
+                            <a class="phoenix-btn-item" href="#" data-title="qzone" title="QQ帐号">QQ帐号</a>
+                        </li>
+                        <li class="bd-acc-weixin" data-dialog="1" data-acc="42" data-height="450" data-width="850">
+                            <a class="phoenix-btn-item" href="#" data-title="weixin" title="微信">微信</a>
+                        </li>
+                    </ul>
+                </div> -->
+
+                <div class="login-bottom">
+                    <a class="login-tip" :href="registerHref">注册</a>
+                    |
+                    <a class="login-tip" id="forgetPwd" onclick="openForgetPwd()">忘记密码？</a>
+                </div>
+            </div>
+        </Card>
+    </div>
+</div>
+<div class="footer">
+    <span class="footerSpan">南京雄君软件科技有限公司</span>
+</div>
+<script src="/account/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jit.sose.mapper.ExcelMapper">
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.Excel">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" />
+    <result column="state_date" jdbcType="TIMESTAMP" property="stateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, user_id, title, state, created_date, state_date
+  </sql>
+  
+   <insert id="insert" parameterType="org.jit.sose.entity.Excel"
+		 useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+    insert into excel
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        user_id,
+        title,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        #{userId,jdbcType=INTEGER},
+        #{title,jdbcType=VARCHAR},
+    </trim>
+  </insert>
+  
+ <!--  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from excel
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from excel
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+ 
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.Excel">
+    update excel
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.jit.sose.entity.Excel">
+    update excel
+    set user_id = #{userId,jdbcType=INTEGER},
+      title = #{title,jdbcType=VARCHAR},
+      state = #{state,jdbcType=CHAR},
+      created_date = #{createdDate,jdbcType=TIMESTAMP},
+      state_date = #{stateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.Excel">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="row_id" jdbcType="INTEGER" property="rowId" />
+    <result column="col_id" jdbcType="INTEGER" property="colId" />
+    <result column="rowspan" jdbcType="INTEGER" property="rowspan" />
+    <result column="colspan" jdbcType="INTEGER" property="colspan" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="style" jdbcType="VARCHAR" property="style" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" />
+    <result column="state_date" jdbcType="TIMESTAMP" property="stateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, row_id, col_id, rowspan, colspan, content, style, state, created_date, state_date
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from excel
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from excel
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.jit.sose.entity.Excel">
+    insert into excel (id, row_id, col_id, 
+      rowspan, colspan, content, 
+      style, state, created_date, 
+      state_date)
+    values (#{id,jdbcType=INTEGER}, #{rowId,jdbcType=INTEGER}, #{colId,jdbcType=INTEGER}, 
+      #{rowspan,jdbcType=INTEGER}, #{colspan,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR}, 
+      #{style,jdbcType=VARCHAR}, #{state,jdbcType=CHAR}, #{createdDate,jdbcType=TIMESTAMP}, 
+      #{stateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="org.jit.sose.entity.Excel">
+    insert into excel
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="rowId != null">
+        row_id,
+      </if>
+      <if test="colId != null">
+        col_id,
+      </if>
+      <if test="rowspan != null">
+        rowspan,
+      </if>
+      <if test="colspan != null">
+        colspan,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="style != null">
+        style,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="createdDate != null">
+        created_date,
+      </if>
+      <if test="stateDate != null">
+        state_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="rowId != null">
+        #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null">
+        #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="rowspan != null">
+        #{rowspan,jdbcType=INTEGER},
+      </if>
+      <if test="colspan != null">
+        #{colspan,jdbcType=INTEGER},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="style != null">
+        #{style,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.jit.sose.entity.Excel">
+    update excel
+    <set>
+      <if test="rowId != null">
+        row_id = #{rowId,jdbcType=INTEGER},
+      </if>
+      <if test="colId != null">
+        col_id = #{colId,jdbcType=INTEGER},
+      </if>
+      <if test="rowspan != null">
+        rowspan = #{rowspan,jdbcType=INTEGER},
+      </if>
+      <if test="colspan != null">
+        colspan = #{colspan,jdbcType=INTEGER},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="style != null">
+        style = #{style,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="createdDate != null">
+        created_date = #{createdDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="stateDate != null">
+        state_date = #{stateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.jit.sose.entity.Excel">
+    update excel
+    set row_id = #{rowId,jdbcType=INTEGER},
+      col_id = #{colId,jdbcType=INTEGER},
+      rowspan = #{rowspan,jdbcType=INTEGER},
+      colspan = #{colspan,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR},
+      style = #{style,jdbcType=VARCHAR},
+      state = #{state,jdbcType=CHAR},
+      created_date = #{createdDate,jdbcType=TIMESTAMP},
+      state_date = #{stateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update> -->
+</mapper>

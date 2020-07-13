@@ -1,0 +1,35 @@
+mail.transport.protocol=smtp  
+mail.host=smtp.qq.com  
+mail.smtp.auth=true  
+mail.smtp.port=465  
+
+mail.username=test2018  
+mail.password=bvpsxrwjjtuyebea  
+mail.from=2528715653@qq.com 
+
+mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory  
+mail.smtp.socketFactory.fallback=false  
+mail.smtp.socketFactory.port=465  
+
+
+#发件人的 邮箱 和 密码
+myEmailAccount=2528715653@qq.com
+myEmailPassword=bvpsxrwjjtuyebea
+
+#发件人邮箱的 SMTP 服务器地址
+myEmailSMTPHost=smtp.qq.com
+
+#SMTP 服务器的端口
+smtpPort=465
+
+#自定义验证码有效时间,单位分钟
+#注册验证码有效时间,单位分钟
+registerFailureTime = 10
+#忘记密码验证码有效时间,单位分钟
+forgetPwdFailureTime = 5
+#登录验证码有效时间,单位分钟
+loginFailureTime = 5
+
+#自定义短信验证码的长度
+codeLength = 6
+

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.SchoolInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.SchoolInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="school_name" property="schoolName" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, school_name, remark, state_date, state
+	</sql>
+	
+	<select id="selectSchoolInfoList" resultMap="BaseResultMap" >
+        SELECT
+		    id,
+		    school_name
+		FROM
+		    school_info
+		WHERE
+		    state = 'A'
+		ORDER BY
+		    school_name
+    </select>
+    
+ 	<select id= "countBySchoolInfo" resultType="java.lang.Integer"
+		parameterType="org.jit.sose.entity.SchoolInfo">
+		SELECT
+	    	COUNT(*)
+	    FROM
+	    	school_info
+	    WHERE
+	    	state = 'A'
+	    <if test="schoolName!= null">
+	    AND school_name = #{schoolName,jdbcType=INTEGER}
+	    </if>
+	    <if test="id!= null">
+	    AND id != #{id,jdbcType=INTEGER}
+	    </if>
+	</select>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from school_info
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="listBySchoolInfo" parameterType="org.jit.sose.entity.SchoolInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM
+		school_info
+		WHERE
+		state = 'A'
+		<if test="schoolName!= null">
+			and LOCATE(#{schoolName},school_name)
+		</if>
+		ORDER BY id
+	</select>
+	<update id="delete" parameterType="java.lang.Integer">
+		update school_info
+		SET state =
+		'X'
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE school_info
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	<insert id="insert" parameterType="org.jit.sose.entity.SchoolInfo">
+			insert into school_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			school_name,
+			remark,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{schoolName,jdbcType=VARCHAR},
+			#{remark,jdbcType=VARCHAR},
+		</trim>
+	</insert>
+	<update id="update" parameterType="org.jit.sose.entity.SchoolInfo">
+		update school_info
+		<set>
+			<if test="schoolName!= null">
+				school_name = #{schoolName,jdbcType=VARCHAR},
+			</if>
+			<if test="remark!= null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+</mapper>

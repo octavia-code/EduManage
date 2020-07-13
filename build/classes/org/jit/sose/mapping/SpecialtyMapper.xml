@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.SpecialtyMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.Specialty" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="subject_name" property="subjectName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="school_info_id" property="schoolInfoId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, subject_name, remark, state_date, state,school_info_id
+  </sql>
+   <!-- 查询任务id和任务名称集合 -->
+  <select id="selectSpecialtyList" resultMap="BaseResultMap">
+	    SELECT
+		    s.id,
+		    s.subject_name,
+		    s.remark
+		FROM
+		    `specialty` s
+		WHERE
+		    s.state = 'A'
+		ORDER BY 
+			s.id
+	  </select> 
+	  <select id="selectBySpecialty" resultMap="BaseResultMap" parameterType="org.jit.sose.entity.Specialty">
+	    SELECT
+			s.id,
+			s.subject_name
+			FROM
+			specialty s
+			LEFT JOIN school_info si ON s.school_info_id = si.id
+			WHERE
+			s.state = 'A'
+			AND s.school_info_id = #{schoolInfoId,jdbcType=INTEGER}
+	  </select> 
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from specialty
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <update id="delete" parameterType="java.lang.Integer" >
+    update specialty
+    SET state = 'X'
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="insert" parameterType="org.jit.sose.entity.Specialty" >
+	INSERT INTO specialty
+	<trim prefix="(" suffix=")" suffixOverrides=",">
+		school_info_id
+		subject_name
+		<if test="remark!=null">
+			remark
+		</if>
+	</trim>
+	<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+		VALUES
+		#{schoolInfoId,jdbcType=INTEGER}
+		#{subjectName,jdbcType=VARCHAR}
+		<if test="remark!=null">
+			#{remark,jdbcType=VARCHAR}
+		</if>
+	</trim>
+  </insert>
+  <update id="update" parameterType="org.jit.sose.entity.Specialty" >
+    update specialty
+    <set >
+        remark = #{remark,jdbcType=VARCHAR}
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="deleteSelection" parameterType="java.util.List">
+	   UPDATE specialty
+		SET state = 'X'
+		WHERE
+		    id IN
+		    <!--每次从list集合中取出数据放入id中 -->
+		    <foreach collection="list"  item="id"  index="index"
+		      separator="," open="(" close=")">
+		      #{id,jdbcType=INTEGER}
+		    </foreach>
+	</update>
+  <select id="listBySpecialty" parameterType="org.jit.sose.entity.Specialty"
+		resultMap="BaseResultMap">
+		SELECT
+			s.id,
+			s.subject_name,
+			s.remark,
+			s.school_info_id,
+			si.school_name AS schoolName
+			FROM
+			specialty s
+			LEFT JOIN school_info si ON s.school_info_id = si.id
+			WHERE
+			s.state = 'A'
+			<if test="subjectName != null">
+					AND LOCATE(#{subjectName},subject_name)
+				</if>
+			ORDER BY s.id
+	</select>
+
+ <select id="countBySpecialty" parameterType="org.jit.sose.entity.Specialty" resultType="java.lang.Integer">
+SELECT
+	count(*)
+FROM
+	specialty
+WHERE
+	state = 'A'
+AND subject_name = #{subjectName,jdbcType=VARCHAR}
+ 
+ </select>
+</mapper>

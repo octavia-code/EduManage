@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>jQuery handsontable-excel Example</title>
+<script type="text/javascript" src="/public/common.js"></script>
+<script src="js/handsontable.full.min.js"></script>
+<script src="js/handsontable.full.js"></script>
+<script src="js/handsontable.js"></script>
+<script src="js/handsontable.min.js"></script>
+<link rel="stylesheet" media="screen" href="css/handsontable.css">
+<link rel="stylesheet" media="screen" href="css/handsontable.full.css"> 
+<link rel="stylesheet" media="screen" href="css/handsontable.full.min.css"> 
+<link rel="stylesheet" media="screen" href="css/handsontable.min.css"> 
+
+
+
+</head>
+<body>
+
+<p>这是一个表格2</p>
+<div id="dataTable"></div>
+
+
+
+<div id="index">
+<i-button type="primary" @click="saveTA">保存</i-button>
+
+</div>
+
+
+
+
+	<script src="js/index.js"></script>
+<script src="js/handson.js"></script>
+</body>
+</html>

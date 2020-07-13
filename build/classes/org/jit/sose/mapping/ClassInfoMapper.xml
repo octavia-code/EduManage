@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.ClassInfoMapper">
+	<resultMap id="BaseResultMap" type="org.jit.sose.entity.ClassInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="class_name" property="className" jdbcType="VARCHAR" />
+		<result column="specialty_id" property="specialtyId" jdbcType="INTEGER" />
+		<result column="year_plan_id" property="yearPlanId" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="created_date" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, class_name, specialty_id, year_plan_id, remark,
+		created_date,
+		state_date, state
+	</sql>
+	<!-- 查询班级信息id和班级名称集合 -->
+	<select id="selectClassInfoList" resultMap="BaseResultMap">
+		SELECT
+		id,
+		class_name
+		FROM
+		class_info
+		WHERE
+		state = 'A'
+		ORDER BY
+		id DESC
+	</select>
+	<!-- 过滤查询班级信息 -->
+	<select id="listByClassInfo" parameterType="org.jit.sose.entity.ClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		c.id,
+		c.class_name,
+		c.specialty_id,
+		c.year_plan_id,
+		c.remark,
+		c.created_date,
+		c.state_date,
+		c.state,
+		s.subject_name AS subjectName,
+		y.year_name AS yearName
+		FROM
+		class_info c
+		LEFT JOIN specialty s ON
+		c.specialty_id = s.id
+		LEFT JOIN year_plan y ON c.year_plan_id = y.id
+		WHERE
+		c.state = 'A'
+		AND
+		s.state = 'A'
+		AND
+		y.state = 'A'
+		<if test="className != null">
+			AND LOCATE(#{className},class_name)
+		</if>
+		ORDER BY c.id
+	</select>
+	<!-- 根据班级信息标识id查询班级信息 -->
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM class_info
+		WHERE id = #{id,jdbcType=INTEGER}
+	</select>
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="java.lang.Integer">
+		UPDATE class_info
+		SET state =
+		'X'
+		WHERE
+		id = #{id,jdbcType=INTEGER}
+	</update>
+	<!-- 批量逻辑删除 -->
+	<update id="deleteSelection" parameterType="java.util.List">
+		UPDATE class_info
+		SET state = 'X'
+		WHERE
+		id IN
+		<!--每次从list集合中取出数据放入id中 -->
+		<foreach collection="list" item="id" index="index" separator=","
+			open="(" close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	<!-- 插入 -->
+	<insert id="insert" parameterType="org.jit.sose.entity.ClassInfo">
+		<!-- 1、先根据可以确定数据唯一性的字段去数据库中查找，根据返回值判断数据库是否存在当前数据 2、要求实体类中包含count属性即 AS 
+			后的属性,若实体类中包含count，就换一个别的 -->
+		<selectKey keyProperty="count" resultType="java.lang.Integer"
+			order="BEFORE">
+			SELECT
+			count(*) AS count
+			FROM
+			class_info
+			WHERE
+			state = 'A'
+			AND
+			class_name = #{className,jdbcType=VARCHAR}
+		</selectKey>
+
+		<!-- 如果等于0即不存在 才插入 -->
+		<if test="count == 0">
+			INSERT INTO class_info
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				class_name,
+				specialty_id,
+				year_plan_id,
+				<if test="remark != null">
+					remark,
+				</if>
+			</trim>
+			<trim prefix="values (" suffix=")" suffixOverrides=",">
+				#{className,jdbcType=VARCHAR},
+				#{specialtyId,jdbcType=INTEGER},
+				#{yearPlanId,jdbcType=INTEGER},
+				<if test="remark != null">
+					#{remark,jdbcType=VARCHAR},
+				</if>
+			</trim>
+		</if>
+
+		<!-- 若已存在数据，根据唯一属性值将该数据更新（唯一属性值就不要更新了） -->
+		<if test="count > 0">
+			UPDATE class_info
+			<set>
+				<if test="specialtyId != null">
+					specialty_id = #{specialtyId,jdbcType=INTEGER},
+				</if>
+				<if test="yearPlanId != null">
+					year_plan_id = #{yearPlanId,jdbcType=INTEGER},
+				</if>
+				<if test="remark != null">
+					remark = #{remark,jdbcType=VARCHAR},
+				</if>
+
+			</set>
+			WHERE
+			class_name = #{className,jdbcType=VARCHAR}
+		</if>
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="org.jit.sose.entity.ClassInfo">
+		UPDATE class_info
+		<set>
+			<if test="specialtyId != null">
+				specialty_id = #{specialtyId,jdbcType=INTEGER},
+			</if>
+			<if test="yearPlanId != null">
+				year_plan_id = #{yearPlanId,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="listBySpecialtyId" parameterType="org.jit.sose.entity.ClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+			id,
+			class_name
+
+		FROM
+			class_info
+		WHERE
+			state = 'A'
+		AND specialty_id = #{specialtyId,jdbcType=INTEGER}
+	</select>
+
+	<select id="listByYearPlanId" parameterType="org.jit.sose.entity.ClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		id,
+		class_name,
+		year_plan_id,
+		specialty_id
+		FROM
+		class_info
+		WHERE
+		state = 'A'
+		AND year_plan_id=#{yearPlanId,jdbcType=INTEGER}
+	</select>
+	
+	<select id="getClassNameByYearPlanIdSpecialtyId" parameterType="org.jit.sose.entity.ClassInfo"
+		resultMap="BaseResultMap">
+		SELECT
+			id,
+			class_name,
+			year_plan_id,
+			specialty_id
+		FROM
+			class_info
+		WHERE
+			state = 'A'
+		AND year_plan_id = #{yearPlanId,jdbcType=INTEGER}
+		AND specialty_id = #{specialtyId,jdbcType=INTEGER}
+	</select>
+
+
+
+
+</mapper>

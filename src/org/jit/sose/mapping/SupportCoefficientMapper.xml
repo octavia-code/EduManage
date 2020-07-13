@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jit.sose.mapper.SupportCoefficientMapper" >
+  <resultMap id="BaseResultMap" type="org.jit.sose.entity.SupportCoefficient" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="course_info_id" property="courseInfoId" jdbcType="INTEGER" />
+    <result column="value" property="value" jdbcType="DOUBLE" />
+    <result column="indicator_relat_id" property="indicatorRelatId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="state_date" property="stateDate" jdbcType="TIMESTAMP" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, year_plan_id, course_info_id, value, indicator_relat_id, user_id, state_date, 
+    create_date, state
+  </sql>
+  
+   <sql id="Name_Column_List_" >
+    s.id, s.year_plan_id, s.course_info_id, s.value, s.indicator_relat_id, s.user_id, s.state_date, 
+    s.create_date, s.state
+  </sql>
+  
+  <select id="listBySupportCoefficient" parameterType="org.jit.sose.entity.SupportCoefficient"
+        resultMap="BaseResultMap">
+        SELECT
+            <include refid="Name_Column_List_" />,
+            y.year_name AS yearName,c.course_name AS courseName
+        FROM
+            support_coefficient s
+		LEFT JOIN year_plan y ON y.id = s.year_plan_id
+		LEFT JOIN course_info c ON c.id = s.course_info_id
+		WHERE
+		    1 = 1
+		AND s.state = 'A'
+		AND y.state = 'A'
+		AND c.state = 'A'
+	    <if test="courseInfoId != null" >
+	        AND s.course_info_id = #{courseInfoId,jdbcType=INTEGER}
+	    </if>
+		ORDER BY
+		    s.create_date DESC
+    </select>
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from support_coefficient
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <update id="delete" parameterType="java.lang.Integer">
+        UPDATE support_coefficient
+        SET state = 'X'
+        WHERE
+            id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <update id="deleteSelection" parameterType="java.util.List">
+       UPDATE support_coefficient
+        SET state = 'X'
+        WHERE
+            id IN
+            <!--每次从list集合中取出数据放入id中 -->
+            <foreach collection="list"  item="id"  index="index"
+              separator="," open="(" close=")">
+              #{id,jdbcType=INTEGER}
+            </foreach>
+    </update>
+  
+  <insert id="insert" parameterType="org.jit.sose.entity.SupportCoefficient" >
+    insert into support_coefficient
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        course_info_id,
+        value,
+        indicator_relat_id,
+        user_id,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        #{courseInfoId,jdbcType=INTEGER},
+        #{value,jdbcType=DOUBLE},
+        #{indicatorRelatId,jdbcType=INTEGER},
+        #{userId,jdbcType=INTEGER},
+    </trim>
+  </insert>
+  <update id="update" parameterType="org.jit.sose.entity.SupportCoefficient" >
+    update support_coefficient
+    <set >
+      <if test="value != null" >
+        value = #{value,jdbcType=DOUBLE},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

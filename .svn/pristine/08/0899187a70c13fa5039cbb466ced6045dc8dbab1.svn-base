@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+	<display-name>jittest</display-name>
+	<welcome-file-list>
+		<welcome-file>/</welcome-file>
+	</welcome-file-list>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			classPath:applicationContext.xml
+        </param-value>
+	</context-param>
+	<context-param>
+		<param-name>spring.profiles.active</param-name>
+		<param-value>dev</param-value>
+	</context-param>
+	<context-param>
+		<param-name>spring.profiles.default</param-name>
+		<param-value>dev</param-value>
+	</context-param>
+	<context-param>
+		<param-name>spring.liveBeansView.mbeanDomain</param-name>
+		<param-value>dev</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc-servlet.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.css</url-pattern>
+		<url-pattern>*.js</url-pattern>
+		<url-pattern>*.jpg</url-pattern>
+		<url-pattern>*.png</url-pattern>
+		<url-pattern>*.eot</url-pattern>
+		<url-pattern>*.svg</url-pattern>
+		<url-pattern>*.ttf</url-pattern>
+		<url-pattern>*.woff</url-pattern>
+	</servlet-mapping>
+
+	<!-- 设置字符集的过滤器 -->
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>*.sose</url-pattern>
+	</filter-mapping>
+
+
+    <!-- Filter的执行顺序和Filter在web.xml文件中的位置先后无关
+    只和mapping的顺序有关，谁的mapping在前，就先执行谁 -->
+
+	<!-- 配置跨域的过滤器 -->
+	<filter>
+		<filter-name>CORSFilter</filter-name>
+		<filter-class>org.jit.sose.filter.CORSFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CORSFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+    <!-- 配置错误页面 -->	
+	<error-page>
+	   <error-code>404</error-code>
+	   <location>/err/404</location>
+	</error-page>
+
+	<!-- 配置token的过滤器 -->
+	<filter>
+		<filter-name>TokenRequestFilter</filter-name>
+		<filter-class>org.jit.sose.filter.TokenRequestFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>TokenRequestFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+</web-app>
